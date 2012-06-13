@@ -10,19 +10,6 @@ using namespace std;
 
 //Server
 
-//Room struct with room name, port num, and user list
-typedef struct {
-	char* room_name;
-	int port_num;
-	int users[10];
-} room;
-
-//Client struct to hold the client sock and which room client is in
-typedef struct {
-	int client_sock;
-	room chat_room;
-} client;
-
 int main() {
 
 	int server_portno;
