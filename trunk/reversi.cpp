@@ -13,13 +13,6 @@ string intToString(int number) {
 	return ss.str();
 }
 
-class Piece {
-
-public:
-
-
-};
-
 class Position {
 
 	int row;
@@ -44,22 +37,42 @@ public:
 	occupiedType getOccupied() {
 		return occupied;
 	}
-	
 };
 
 class Board { 
 
 	Position grid[8][8];
+	bool display;
+	unsigned int move;
 
 public:
 	//constructs the board with all empty spaces
-	Board() {		
+	Board() {
+		display = false;
+		move = 0;
 		for(int i = 0; i < 8; i++) {
 			for(int j = 0; j < 8; j++) {
 				Position new_spot(i, columnType(j));
 				grid[j][i] = new_spot;
 			}
 		}
+	}
+	
+	void displayOn() {
+		display = true;
+	}
+	
+	void displayOff() {
+		display = false;
+	}
+	
+	bool isValidMove(columnType column, int row) {
+		bool isAdjacent = false;
+		
+		if( 1 ) {
+			//
+		}
+		
 	}
 	
 	void setElement(columnType column, int row, occupiedType occupy) {
@@ -98,17 +111,35 @@ public:
 	
 		return game_board;
 	}
+	
+	string showValidMoves() {
+	
+		if(move % 2 == 0) {
+			//black's move
+			
+		
+		
+		
+		} else { //white's move
+		
+			
+		
+		}
+	
+	}
+	
 };
 
-
 int main() {
-
 
 	Board game;
 	
 	cout << game.stringify() << '\n';
 	
-	game.setElement(a,1,WHITE);
+	game.setElement(d,4,WHITE);
+	game.setElement(e,4,BLACK);
+	game.setElement(d,5,BLACK);
+	game.setElement(e,5,WHITE);
 	
 	cout << game.stringify() << '\n';
 	

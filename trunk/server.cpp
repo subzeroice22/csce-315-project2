@@ -50,7 +50,7 @@ int main() {
 	
 	int rec = recv(client_sock, buffer, 100, 0);
 	
-	while( strcmp(buffer, "QUIT") != 0) {
+	while(strcmp(buffer, "QUIT") != 0) {
 		
 		cout << buffer << '\n';
 		int rec = recv(client_sock, buffer, 100, 0);
