@@ -209,6 +209,10 @@ int api(std::string commandLine)
 			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, 4X4, 8X8, EXIT\n";
 		}
 	}
+	
+	std::cout<<"Player1"<<"BLACK"<<player1<<"\n";
+	std::cout<<"Player2"<<"WHITE"<<player2<<"\n";
+	
 	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
 	game.setDifficulty=difficulty;
 	while(1){
@@ -228,13 +232,13 @@ int api(std::string commandLine)
 		            assert(!"CANNOT UNDO, NOT ENOUGH STATES IN STACK");
 		            std::cout<<"ILLEGAL\n";
 		            continue;
-				}
+				}continue;
 		    }else if(input=="REDO"){
 		        if(!game.DoRedo()){
 		            assert(!"CANNOT REDO, NOT ENOUGH STATES IN STACK");
 		            std::cout<<"ILLEGAL\n";
 		            continue;
-		        }
+		        }continue;
 		    }else{
 				std::cout << "ILLEGAL\n";
 				continue;
