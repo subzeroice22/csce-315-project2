@@ -14,7 +14,7 @@
 #include <memory> 
 #include <sstream> 
 #include "UnitReversi.h"//#includes <vector>
-//--------------------------------------------------------------------------- 
+//<< override for Reversi object squares
 std::ostream& operator<<(std::ostream& os, const Square s) 
 { 
   switch (s) 
@@ -27,7 +27,7 @@ std::ostream& operator<<(std::ostream& os, const Square s)
   } 
   return os; 
 } 
-//--------------------------------------------------------------------------- 
+//<< override for Reversi object board outlay
 std::ostream& operator<<(std::ostream& os, const Reversi& r) 
 { 
   { //Show the indices horizontally 
@@ -81,14 +81,14 @@ const bool IsInt(const std::string& s, int& rInt)
   } 
   return true; 
 } 
-//--------------------------------------------------------------------------- 
+//Handles all input and drops the newline char
 const std::string GetInput() 
 { 
   std::string s; 
   std::getline(std::cin,s,'\n'); 
   return s; 
 } 
-//--------------------------------------------------------------------------- 
+//Breaks up the coordinate input for an x and y value
 const std::vector<std::string> SeperateString(std::string input, const char seperator) 
 { 
   assert(input.empty()==false); 
@@ -111,7 +111,7 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
   result.push_back(input); 
   return result; 
 } 
-//--------------------------------------------------------------------------- 
+//Up front determination whether the users coordinate is a valid input type 
 const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate) {
     if(input.size()!=2) return false;
 	//TODO: need error (bounds) checking on x and y
@@ -121,20 +121,20 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
     coordinate.first=x;
 	coordinate.second=y;
     return true;
-    /*
-  if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
+
+/*  if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
   if ( *(input.begin()) == ',' || *(input.end() - 1) == ',') return false; 
   const std::string::const_iterator i = std::find(input.begin(), input.end(), ','); 
   assert(i != input.end() ); //Comma must be in! Checked above! 
 
-  const std::vector<std::string> v(SeperateString(input,',')); 
+  const std::vector<std::string> v(SeperateString(input,','));
   if (v.size() != 2) return false; 
   if (IsInt(v[0],coordinate.first)==false) return false; 
   if (IsInt(v[1],coordinate.second)==false) return false; 
- return true; 
-*/
+ return true; */
+
 } 
-//--------------------------------------------------------------------------- 
+//Optional menu option allowing for board sizes between 4X4 and 16X16
 const int AskUserForBoardSize() 
 { 
   //Get the board's size 
@@ -161,7 +161,7 @@ const int AskUserForBoardSize()
     return size; 
   } 
 } 
-//--------------------------------------------------------------------------- 
+//Handles user input and display of data 
 int api(std::string commandLine)
 {
 	Square player=player1; 
@@ -301,7 +301,6 @@ int api(std::string commandLine)
 		
 	}
 }
-
 
 int main() 
 {
