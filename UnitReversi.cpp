@@ -38,12 +38,14 @@ const Square Reversi::GetSquare(const int x, const int y) const
 //Simply sets a square 
 void Reversi::SetSquare(const int x, const int y, const Square player) 
 { 
-  assert(player != empty); 
+  assert(player != empty); //terminates program if player is NULL
 
   mBoard[y][x] = player; 
 
-  assert(GetSquare(x,y)==player); 
+  assert(GetSquare(x,y)==player); //terminates program if coord is NULL
 } 
+//--------------------------------------------------------------------------- 
+
 //--------------------------------------------------------------------------- 
 //Do a complete move 
 void Reversi::DoMove(const int x, const int y, const Square player) 
@@ -60,8 +62,6 @@ void Reversi::DoMove(const int x, const int y, const Square player)
   if (IsValidMoveUpRight(  x,y,player) == true) DoMoveUpRight(  x+1,y-1,player); 
   SetSquare(x,y,player); 
 } 
-//--------------------------------------------------------------------------- 
-
 //--------------------------------------------------------------------------- 
 const bool Reversi::IsValidMove(const int x, const int y, const Square player) const 
 { 
@@ -331,9 +331,7 @@ const Square GetOtherPlayer(const Square player)
   return empty; 
 } 
 //--------------------------------------------------------------------------- 
-const Square GetSquareXy( 
-  const std::vector<std::vector<Square> >& board, 
-  const int x, const int y) 
+const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const int x, const int y) 
 { 
   const int size = board.size(); 
   assert(x >= 0); 
