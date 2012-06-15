@@ -31,7 +31,10 @@ Unknown??????????????????
 ---------------------------------------------------------------------------*/ 
 const std::vector<std::vector<Square> >& Reversi::GetBoard() const { 
   return mBoard; 
-} 
+}
+void Reversi::SetBoard(std::vector<std::vector<Square> > newBoard){
+	mBoard = newBoard;
+}
 //Returns type Square, containING char empty, player1,or player2 at xy coord
 const Square Reversi::GetSquare(const int x, const int y) const { 
   return GetSquareXy(mBoard,x,y); 
