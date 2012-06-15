@@ -19,10 +19,10 @@ std::ostream& operator<<(std::ostream& os, const Square s)
 { 
   switch (s) 
   { 
-    case empty  : os << "_"; break; 
-	case validMove: os << "x"; break;
-    case player1: os <<BOLDBLACK<<"O"<<RESET; break; //char(2); break; 
-    case player2: os <<BOLDWHITE<<"@"<<RESET; break; //char(1); break; 
+    case empty  : os <<GREEN<<"_"<<GREEN; break; 
+	case validMove: os <<BOLDYELLOW<<"x"<<RESET<<GREEN; break;
+    case player1: os <<BOLDBLACK<<"O"<<RESET<<GREEN; break; //char(2); break; 
+    case player2: os <<BOLDWHITE<<"@"<<RESET<<GREEN; break; //char(1); break; 
     default: assert(!"Should not get here"); break; 
   } 
   return os; 
@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
     os << "  "; 
     for (int i=0; i!=size; ++i) 
     { 
-        os<<"_ ";
+        os<<GREEN<<"_ "<<RESET;
       //os << (i%10)<<" "; 
     } 
     os << std::endl; 
@@ -48,9 +48,9 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
       row!=lastRow; 
       ++row, ++i) 
     { 
-      os << (i+1) << "|"; 
+      os << WHITE<<(i+1) <<GREEN<<"|"; 
       std::copy( (*row).begin(), (*row).end(),std::ostream_iterator<Square>(os,"|")); 
-      os<<"\n";
+      os<<"\n"<<RESET;
       //os << " " << (i%10) << '\n'; 
     } 
   } 
@@ -61,7 +61,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
     const int size = r.GetSize(); 
     for (int i=0; i!=size; ++i) 
     { 
-      os<< char( (int('a')+i) )<< " ";
+      os<<WHITE<< char( (int('a')+i) )<<RESET<< " ";
       //os << i%10; 
     } 
     os << std::endl; 
@@ -222,7 +222,7 @@ int api(std::string commandLine)
 		if(input=="EXIT")
 			return 0;
 		if(input=="?")
-			std::cout<<"Enter coordinates as x,y values, EXIT\n";
+			std::cout<<"Enter coordinates as # alpha values, EXIT\n";
 		
 		const bool isValidCoordinate = IsCoordinate(input, coordinate); 
 		if (isValidCoordinate == false) 
