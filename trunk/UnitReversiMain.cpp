@@ -1,11 +1,11 @@
-//--------------------------------------------------------------------------- 
-/* 
+/*--------------------------------------------------------------------------- 
+	Project2 CSCE 315
+	Laramie Goode, Chris Voss, and Curtis Franks
     Based on the Reversi Console by
-	Richel Bilderbeek http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
-*/ 
-//---------------------------------------------------------------------------  
-//--------------------------------------------------------------------------- 
-#include <vector> 
+	Richel Bilderbeek 
+	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
+---------------------------------------------------------------------------*/
+//#include <vector> 
 #include <numeric> 
 #include <algorithm> 
 #include <iostream> 
@@ -13,7 +13,7 @@
 #include <iterator> 
 #include <memory> 
 #include <sstream> 
-#include "UnitReversi.h" 
+#include "UnitReversi.h"//#includes <vector>
 //--------------------------------------------------------------------------- 
 std::ostream& operator<<(std::ostream& os, const Square s) 
 { 
