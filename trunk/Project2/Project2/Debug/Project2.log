@@ -1,4 +1,4 @@
-﻿Build started 6/14/2012 10:07:43 PM.
+﻿Build started 6/15/2012 4:10:53 PM.
      1>Project "H:\CSCE315Project2\Project2\Project2\Project2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Project2.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -11,7 +11,7 @@
          LINK : H:\CSCE315Project2\Project2\Debug\Project2.exe not found or not built by the last incremental link; performing full link
          Project2.vcxproj -> H:\CSCE315Project2\Project2\Debug\Project2.exe
        Manifest:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"H:\CSCE315Project2\Project2\Debug\Project2.exe;#1" /manifest Debug\Project2.exe.intermediate.manifest
+         c:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"H:\CSCE315Project2\Project2\Debug\Project2.exe;#1" /manifest Debug\Project2.exe.intermediate.manifest
        FinalizeBuildStatus:
          Deleting file "Debug\Project2.unsuccessfulbuild".
          Touching "Debug\Project2.lastbuildstate".
@@ -19,4 +19,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.78
+Time Elapsed 00:00:02.82

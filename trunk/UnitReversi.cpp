@@ -32,16 +32,11 @@ Unknown??????????????????
 const std::vector<std::vector<Square> >& Reversi::GetBoard() const { 
   return mBoard; 
 } 
-/*--------------------------------------------------------------------------- 
-Returns the type Square(which can contain the char empty, player1,or player2)
-at the provided x y coordinates.
----------------------------------------------------------------------------*/
+//Returns type Square, containING char empty, player1,or player2 at xy coord
 const Square Reversi::GetSquare(const int x, const int y) const { 
   return GetSquareXy(mBoard,x,y); 
 } 
-/*--------------------------------------------------------------------------- 
-Simply sets a square
----------------------------------------------------------------------------*/
+//Simply sets square with player's move (ie sets to player1 or player2)
 void Reversi::SetSquare(const int x, const int y, const Square player) { 
   assert(player != empty); //terminates program if player is NULL
 
@@ -49,6 +44,7 @@ void Reversi::SetSquare(const int x, const int y, const Square player) {
 
   assert(GetSquare(x,y)==player); //terminates program if coord is NULL
 } 
+//Perfoms a reverse of the last two moves
 const bool Reversi::DoUndo(){
     if(boardHistory.size()<2) return false;
     boardRedos.push(new std::vector< std::vector< Square > >(mBoard) );
@@ -59,6 +55,7 @@ const bool Reversi::DoUndo(){
 	boardHistory.pop();
     return true;
 }
+//restores two moves that had been reversed
 const bool Reversi::DoRedo(){
     if(boardRedos.size()<2) return false;
     boardHistory.push(new std::vector< std::vector<Square> >(mBoard));
@@ -71,6 +68,7 @@ const bool Reversi::DoRedo(){
 	
 	
 }
+//Checks IsValidMove and then  
 void Reversi::DoMove(const int x, const int y, const Square player) { 
   assert(IsValidMove(x,y,player)==true || "Invalid move!"); 
     boardHistory.push( new std::vector< std::vector<Square> >(mBoard));
