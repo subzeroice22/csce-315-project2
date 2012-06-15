@@ -5,11 +5,11 @@
 	Richel Bilderbeek 
 	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
 ---------------------------------------------------------------------------*/
-#pragma hdrstop 
+//#pragma hdrstop 
 
 #include "UnitReversi.h" 
-#include <cassert> //allows for assert debugging tools
-
+//--------------------------------------------------------------------------- 
+#include <cassert> 
 /*--------------------------------------------------------------------------- 
 Primary board constructor
 ---------------------------------------------------------------------------*/
@@ -53,13 +53,30 @@ void Reversi::SetSquare(const int x, const int y, const Square player)
   assert(GetSquare(x,y)==player); //terminates program if coord is NULL
 } 
 //--------------------------------------------------------------------------- 
-
+const bool Reversi::DoUndo(){
+    if(boardHistory.size()<2) return false;
+    
+    boardRedos.push(boardHistory.top());
+    boardRedos.push(boardHistory.top());
+    return true;
+}
+const bool Reversi::DoRedo(){
+    if(boardRedos.size()<2) return false;
+    
+	return true;
+	
+	
+}
 //--------------------------------------------------------------------------- 
 //Do a complete move 
 void Reversi::DoMove(const int x, const int y, const Square player) 
 { 
   assert(IsValidMove(x,y,player)==true || "Invalid move!"); 
-
+    boardHistory.push( new std::vector< std::vector<Square> >(mBoard));
+    while(!boardRedos.empty()){
+        delete boardRedos.top();
+		boardRedos.pop();
+    }
   if (IsValidMoveUp(       x,y,player) == true) DoMoveUp(       x  ,y-1,player); 
   if (IsValidMoveUpLeft(   x,y,player) == true) DoMoveUpLeft(   x-1,y-1,player); 
   if (IsValidMoveLeft(     x,y,player) == true) DoMoveLeft(     x-1,y  ,player); 
@@ -351,4 +368,6 @@ const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const in
 //--------------------------------------------------------------------------- 
 
 
-#pragma package(smart_init)
+//#pragma package(smart_init)
+
+
