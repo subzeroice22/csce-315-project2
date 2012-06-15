@@ -20,6 +20,7 @@ std::ostream& operator<<(std::ostream& os, const Square s)
   switch (s) 
   { 
     case empty  : os << "_"; break; 
+	case validMove: os << "x"; break;
     case player1: os << '@'; break; //char(2); break; 
     case player2: os << 'O'; break; //char(1); break; 
     default: assert(!"Should not get here"); break; 
@@ -47,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
       row!=lastRow; 
       ++row, ++i) 
     { 
-      os << (i%10) << "|"; 
+      os << (i+1) << "|"; 
       std::copy( (*row).begin(), (*row).end(),std::ostream_iterator<Square>(os,"|")); 
       os<<"\n";
       //os << " " << (i%10) << '\n'; 
@@ -114,12 +115,12 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
 //--------------------------------------------------------------------------- 
 const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate) {
     if(input.size()!=2) return false;
-    std::cout<<"inGOT:"<<coordinate.first<<":"<<coordinate.second<<"\n";
+	//TODO: need error (bounds) checking on x and y
     int x, y;
     x = input[0] - 'a';
-    y = int(input[1] - '0');
-    
-    std::cout<<"GOT:"<<x<<":"<<y<<std::endl;
+    y = int(input[1] - '0')-1;
+    coordinate.first=x;
+	coordinate.second=y;
     return true;
     /*
   if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
@@ -164,8 +165,7 @@ const int AskUserForBoardSize()
 //--------------------------------------------------------------------------- 
 int api(std::string commandLine)
 {
-
-	Square player; 
+	Square player=player1; 
 	std::pair<int,int> coordinate;
 	int boardSize=8;
 	std::string difficulty="EASY";
@@ -174,13 +174,13 @@ int api(std::string commandLine)
 		const std::string input = GetInput();
 		if(input=="EXIT")
 			return 0;
-		if(input=="WHITE"){
-			player = player1; 
-			std::cout<<"WHITE\n";
-		}
 		if(input=="BLACK"){
-			player = player2;
+			player = player1; 
 			std::cout<<"BLACK\n";
+		}
+		if(input=="WHITE"){
+			player = player2;
+			std::cout<<"WHITE\n";
 		}
 		if(input=="EASY"){
 			difficulty="EASY";
@@ -194,7 +194,7 @@ int api(std::string commandLine)
 			difficulty="HARD";
 			std::cout<<"OK\n";
 		}
-		if(input=="DISPLAY_ON"){
+		if(input=="DISPLAY_ON" || input =="1"){
 			std::cout<<"OK\n";
 			break;
 		}
@@ -213,6 +213,7 @@ int api(std::string commandLine)
 	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
 	game.setDifficulty=difficulty;
 	while(1){
+		std::cout<<"Current Player:"<<player<<"\n";
 		std::cout<< game;
 		const std::string input = GetInput();
 		if(input=="EXIT")
@@ -263,15 +264,17 @@ int api(std::string commandLine)
 		} 
 
 		//Check if other player can actually do a move 
-	if (game.GetValidMoves(player).empty()==true) 
-		{ 
+		if (game.GetValidMoves(player).empty()==true) 
+		{ //if otherPlayer cannot move,
 		  std::cout << "Too bad! Player " << player << " is unabled to do a valid move!"; 
-		  player = (player == player1 ? player2 : player1); 
+		  //player = (player == player1 ? player2 : player1); 
 		  std::cout << "\nThe next turn again goes to player " << player << "!" << std::endl; 
 		  continue; 
 		} 
-
+		
 		player = (player == player1 ? player2 : player1); 
+		//foreach pair m in getValidMoves; setSquare(m , validMove);
+		
 	}
 }
 
