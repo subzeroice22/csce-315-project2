@@ -57,8 +57,8 @@ struct Reversi
 	const bool DoRedo();
   private: 
   std::vector<std::vector<Square> > mBoard; 
-    std::stack<std::vector< std::vector<Square> >* > boardHistory; //on every doMove add to this
-    std::stack<std::vector< std::vector<Square> >* > boardRedos; //on every doMove, clear this
+    std::stack<std::vector< std::vector<Square> >* > boardHistory; 
+    std::stack<std::vector< std::vector<Square> >* > boardRedos;
 
 	
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 
