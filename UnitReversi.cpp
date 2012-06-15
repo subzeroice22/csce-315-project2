@@ -29,48 +29,49 @@ Reversi::Reversi(const int size)
 /*--------------------------------------------------------------------------- 
 Unknown??????????????????
 ---------------------------------------------------------------------------*/ 
-const std::vector<std::vector<Square> >& Reversi::GetBoard() const 
-{ 
+const std::vector<std::vector<Square> >& Reversi::GetBoard() const { 
   return mBoard; 
 } 
 /*--------------------------------------------------------------------------- 
 Returns the type Square(which can contain the char empty, player1,or player2)
 at the provided x y coordinates.
 ---------------------------------------------------------------------------*/
-const Square Reversi::GetSquare(const int x, const int y) const 
-{ 
+const Square Reversi::GetSquare(const int x, const int y) const { 
   return GetSquareXy(mBoard,x,y); 
 } 
 /*--------------------------------------------------------------------------- 
 Simply sets a square
 ---------------------------------------------------------------------------*/
-void Reversi::SetSquare(const int x, const int y, const Square player) 
-{ 
+void Reversi::SetSquare(const int x, const int y, const Square player) { 
   assert(player != empty); //terminates program if player is NULL
 
   mBoard[y][x] = player; 
 
   assert(GetSquare(x,y)==player); //terminates program if coord is NULL
 } 
-//--------------------------------------------------------------------------- 
 const bool Reversi::DoUndo(){
     if(boardHistory.size()<2) return false;
-    
-    boardRedos.push(boardHistory.top());
-    boardRedos.push(boardHistory.top());
+    boardRedos.push(new std::vector< std::vector< Square > >(mBoard) );
+	boardRedos.push(boardHistory.top());
+	boardHistory.pop();
+	mBoard = (*boardHistory.top());
+	delete boardHistory.top();
+	boardHistory.pop();
     return true;
 }
 const bool Reversi::DoRedo(){
     if(boardRedos.size()<2) return false;
-    
+    boardHistory.push(new std::vector< std::vector<Square> >(mBoard));
+	boardHistory.push(boardRedos.top());
+	boardRedos.pop();
+	mBoard =  (*boardRedos.top());
+	delete boardRedos.top();
+	boardRedos.pop();
 	return true;
 	
 	
 }
-//--------------------------------------------------------------------------- 
-//Do a complete move 
-void Reversi::DoMove(const int x, const int y, const Square player) 
-{ 
+void Reversi::DoMove(const int x, const int y, const Square player) { 
   assert(IsValidMove(x,y,player)==true || "Invalid move!"); 
     boardHistory.push( new std::vector< std::vector<Square> >(mBoard));
     while(!boardRedos.empty()){
@@ -87,9 +88,7 @@ void Reversi::DoMove(const int x, const int y, const Square player)
   if (IsValidMoveUpRight(  x,y,player) == true) DoMoveUpRight(  x+1,y-1,player); 
   SetSquare(x,y,player); 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMove(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMove(const int x, const int y, const Square player) const { 
   if (IsValidMoveUp(       x,y,player)==true) return true; 
   if (IsValidMoveUpLeft(   x,y,player)==true) return true; 
   if (IsValidMoveLeft(     x,y,player)==true) return true; 
@@ -100,9 +99,7 @@ const bool Reversi::IsValidMove(const int x, const int y, const Square player) c
   if (IsValidMoveUpRight(  x,y,player)==true) return true; 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveUp(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveUp(const int x, const int y, const Square player) const { 
   int b = y - 1; 
   if (b < 1) return false; 
   if (GetSquare(x,b) != GetOtherPlayer(player)) return false; 
@@ -114,9 +111,7 @@ const bool Reversi::IsValidMoveUp(const int x, const int y, const Square player)
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveUpLeft(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveUpLeft(const int x, const int y, const Square player) const { 
   int a = x - 1; 
   int b = y - 1; 
   if (a < 1 || b < 1) return false; 
@@ -130,9 +125,7 @@ const bool Reversi::IsValidMoveUpLeft(const int x, const int y, const Square pla
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveLeft(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveLeft(const int x, const int y, const Square player) const { 
   int a = x - 1; 
   if (a < 1) return false; 
   if (GetSquare(a,y) != GetOtherPlayer(player)) return false; 
@@ -144,9 +137,7 @@ const bool Reversi::IsValidMoveLeft(const int x, const int y, const Square playe
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveDownLeft(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveDownLeft(const int x, const int y, const Square player) const { 
   const int size = mBoard.size(); 
   int a = x - 1; 
   int b = y + 1; 
@@ -163,9 +154,7 @@ const bool Reversi::IsValidMoveDownLeft(const int x, const int y, const Square p
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveDown(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveDown(const int x, const int y, const Square player) const { 
   const int size = mBoard.size(); 
   int b = y + 1; 
   if (b > size -1 ) return false; 
@@ -178,9 +167,7 @@ const bool Reversi::IsValidMoveDown(const int x, const int y, const Square playe
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveDownRight(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveDownRight(const int x, const int y, const Square player) const { 
   const int size = mBoard.size(); 
   int a = x + 1; 
   int b = y + 1; 
@@ -196,9 +183,7 @@ const bool Reversi::IsValidMoveDownRight(const int x, const int y, const Square 
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveRight(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveRight(const int x, const int y, const Square player) const { 
   const int size = mBoard.size(); 
   int a = x + 1; 
   if (a > size - 1) return false; 
@@ -211,9 +196,7 @@ const bool Reversi::IsValidMoveRight(const int x, const int y, const Square play
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const bool Reversi::IsValidMoveUpRight(const int x, const int y, const Square player) const 
-{ 
+const bool Reversi::IsValidMoveUpRight(const int x, const int y, const Square player) const { 
   const int size = mBoard.size(); 
   int a = x + 1; 
   int b = y - 1; 
@@ -229,9 +212,7 @@ const bool Reversi::IsValidMoveUpRight(const int x, const int y, const Square pl
   } 
   return false; 
 } 
-//--------------------------------------------------------------------------- 
-const std::vector< std::pair<int,int> > Reversi::GetValidMoves(const Square player) const 
-{ 
+const std::vector< std::pair<int,int> > Reversi::GetValidMoves(const Square player) const { 
   const int size = mBoard.size(); 
   std::vector< std::pair<int,int> > v; 
   for (int y=0; y!=size; ++y) 
@@ -246,18 +227,14 @@ const std::vector< std::pair<int,int> > Reversi::GetValidMoves(const Square play
   } 
   return v; 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveUp(const int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveUp(const int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
     --y; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveUpLeft(int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveUpLeft(int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
@@ -265,9 +242,7 @@ void Reversi::DoMoveUpLeft(int x, int y, const Square player)
     --x; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveLeft(int x, const int y, const Square player) 
-{ 
+void Reversi::DoMoveLeft(int x, const int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
@@ -275,9 +250,7 @@ void Reversi::DoMoveLeft(int x, const int y, const Square player)
   } 
 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveDownLeft(int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveDownLeft(int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
@@ -285,18 +258,14 @@ void Reversi::DoMoveDownLeft(int x, int y, const Square player)
     --x; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveDown(const int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveDown(const int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
     ++y; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveDownRight(int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveDownRight(int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
@@ -304,18 +273,14 @@ void Reversi::DoMoveDownRight(int x, int y, const Square player)
     ++x; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveRight(int x, const int y, const Square player) 
-{ 
+void Reversi::DoMoveRight(int x, const int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
     ++x; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-void Reversi::DoMoveUpRight(int x, int y, const Square player) 
-{ 
+void Reversi::DoMoveUpRight(int x, int y, const Square player) { 
   while ( GetSquare(x,y) == GetOtherPlayer(player) ) 
   { 
     SetSquare(x,y,player); 
@@ -323,14 +288,10 @@ void Reversi::DoMoveUpRight(int x, int y, const Square player)
     ++x; 
   } 
 } 
-//--------------------------------------------------------------------------- 
-const int Reversi::GetSize() const 
-{ 
+const int Reversi::GetSize() const { 
   return mBoard.size(); 
 } 
-//--------------------------------------------------------------------------- 
-const int Reversi::Count(const Square player) const 
-{ 
+const int Reversi::Count(const Square player) const { 
   const int size = GetSize(); 
 
   int sum = 0; 
@@ -344,9 +305,7 @@ const int Reversi::Count(const Square player) const
   } 
   return sum; 
 } 
-//--------------------------------------------------------------------------- 
-const Square GetOtherPlayer(const Square player) 
-{ 
+const Square GetOtherPlayer(const Square player) { 
   switch (player) 
   { 
     case player1: return player2; 
@@ -355,9 +314,7 @@ const Square GetOtherPlayer(const Square player)
   assert(!"Invalid player"); 
   return empty; 
 } 
-//--------------------------------------------------------------------------- 
-const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const int x, const int y) 
-{ 
+const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const int x, const int y) { 
   const int size = board.size(); 
   assert(x >= 0); 
   assert(y >= 0); 
@@ -365,7 +322,6 @@ const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const in
   assert(y < size); 
   return board[y][x]; 
 } 
-//--------------------------------------------------------------------------- 
 
 
 //#pragma package(smart_init)

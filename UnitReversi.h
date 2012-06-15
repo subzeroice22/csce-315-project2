@@ -11,7 +11,7 @@
 #include <vector>
 #include <string>
 #include <stack>
-enum Square { empty, player1, player2 }; 
+enum Square { empty, player1, player2, validMove }; 
 //--------------------------------------------------------------------------- 
 struct Reversi 
 { 
