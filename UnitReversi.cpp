@@ -1,16 +1,18 @@
-//--------------------------------------------------------------------------- 
-/* 
+/*--------------------------------------------------------------------------- 
+	Project2 CSCE 315
+	Laramie Goode, Chris Voss, and Curtis Franks
     Based on the Reversi Console by
 	Richel Bilderbeek 
-*/ 
-//--------------------------------------------------------------------------- 
-//--------------------------------------------------------------------------- 
+	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
+---------------------------------------------------------------------------*/
 #pragma hdrstop 
 
 #include "UnitReversi.h" 
-//--------------------------------------------------------------------------- 
-#include <cassert> 
-//--------------------------------------------------------------------------- 
+#include <cassert> //allows for assert debugging tools
+
+/*--------------------------------------------------------------------------- 
+Primary board constructor
+---------------------------------------------------------------------------*/
 Reversi::Reversi(const int size) 
   : mBoard(size,std::vector<Square>(size,empty)) 
 { 
@@ -24,18 +26,24 @@ Reversi::Reversi(const int size)
   SetSquare(x  ,y+1,player2); 
   SetSquare(x+1,y+1,player1); 
 } 
-//--------------------------------------------------------------------------- 
+/*--------------------------------------------------------------------------- 
+Unknown??????????????????
+---------------------------------------------------------------------------*/ 
 const std::vector<std::vector<Square> >& Reversi::GetBoard() const 
 { 
   return mBoard; 
 } 
-//--------------------------------------------------------------------------- 
+/*--------------------------------------------------------------------------- 
+Returns the type Square(which can contain the char empty, player1,or player2)
+at the provided x y coordinates.
+---------------------------------------------------------------------------*/
 const Square Reversi::GetSquare(const int x, const int y) const 
 { 
   return GetSquareXy(mBoard,x,y); 
 } 
-//--------------------------------------------------------------------------- 
-//Simply sets a square 
+/*--------------------------------------------------------------------------- 
+Simply sets a square
+---------------------------------------------------------------------------*/
 void Reversi::SetSquare(const int x, const int y, const Square player) 
 { 
   assert(player != empty); //terminates program if player is NULL
