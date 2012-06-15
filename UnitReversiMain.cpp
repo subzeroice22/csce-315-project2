@@ -21,8 +21,8 @@ std::ostream& operator<<(std::ostream& os, const Square s)
   { 
     case empty  : os << "_"; break; 
 	case validMove: os << "x"; break;
-    case player1: os << '@'; break; //char(2); break; 
-    case player2: os << 'O'; break; //char(1); break; 
+    case player1: os <<BOLDBLACK<<"O"<<RESET; break; //char(2); break; 
+    case player2: os <<BOLDWHITE<<"@"<<RESET; break; //char(1); break; 
     default: assert(!"Should not get here"); break; 
   } 
   return os; 
@@ -68,7 +68,6 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
   }
   return os; 
 } 
-//--------------------------------------------------------------------------- 
 //Checks whether a std::string can be converted to an integer. 
 //Returns true if possible, also returning this integer by referencing. 
 //Returns false otherwise, setting the referenced integer to zero. 
