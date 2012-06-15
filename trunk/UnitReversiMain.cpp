@@ -19,9 +19,9 @@ std::ostream& operator<<(std::ostream& os, const Square s)
 { 
   switch (s) 
   { 
-    case empty  : os << "."; break; 
-    case player1: os << char(2); break; 
-    case player2: os << char(1); break; 
+    case empty  : os << "_"; break; 
+    case player1: os << '@'; break; //char(2); break; 
+    case player2: os << 'O'; break; //char(1); break; 
     default: assert(!"Should not get here"); break; 
   } 
   return os; 
@@ -34,9 +34,9 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
     os << "  "; 
     for (int i=0; i!=size; ++i) 
     { 
-      os << (i%10); 
+        os<<"_ ";
+      //os << (i%10)<<" "; 
     } 
-    os << std::endl; 
     os << std::endl; 
   } 
   { 
@@ -47,19 +47,21 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
       row!=lastRow; 
       ++row, ++i) 
     { 
-      os << (i%10) << " "; 
-      std::copy( (*row).begin(), (*row).end(),std::ostream_iterator<Square>(os,"")); 
-      os << " " << (i%10) << '\n'; 
+      os << (i%10) << "|"; 
+      std::copy( (*row).begin(), (*row).end(),std::ostream_iterator<Square>(os,"|")); 
+      os<<"\n";
+      //os << " " << (i%10) << '\n'; 
     } 
   } 
 
   { //Show the indices horizontally 
-    os << std::endl; 
+    //os << std::endl; 
     os << "  "; 
     const int size = r.GetSize(); 
     for (int i=0; i!=size; ++i) 
     { 
-      os << i%10; 
+      os<< char( (int('a')+i) )<< " ";
+      //os << i%10; 
     } 
     os << std::endl; 
   }
@@ -110,8 +112,16 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
   return result; 
 } 
 //--------------------------------------------------------------------------- 
-const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate) 
-{ 
+const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate) {
+    if(input.size()!=2) return false;
+    std::cout<<"inGOT:"<<coordinate.first<<":"<<coordinate.second<<"\n";
+    int x, y;
+    x = input[0] - 'a';
+    y = int(input[1] - '0');
+    
+    std::cout<<"GOT:"<<x<<":"<<y<<std::endl;
+    return true;
+    /*
   if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
   if ( *(input.begin()) == ',' || *(input.end() - 1) == ',') return false; 
   const std::string::const_iterator i = std::find(input.begin(), input.end(), ','); 
@@ -122,7 +132,7 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
   if (IsInt(v[0],coordinate.first)==false) return false; 
   if (IsInt(v[1],coordinate.second)==false) return false; 
  return true; 
-
+*/
 } 
 //--------------------------------------------------------------------------- 
 const int AskUserForBoardSize() 
@@ -140,12 +150,12 @@ const int AskUserForBoardSize()
     } 
     if ( size < 4) 
     { 
-      std::cout << "Please enter an integer value bigger then 4. " << std::endl; 
+      std::cout << "Please enter an integer value bigger than 4. " << std::endl; 
       continue; 
     } 
     if ( size > 16) 
     { 
-      std::cout << "Please enter an integer value less then 16. " << std::endl; 
+      std::cout << "Please enter an integer value less than 16. " << std::endl; 
       continue; 
     } 
     return size; 
@@ -209,11 +219,26 @@ int api(std::string commandLine)
 			return 0;
 		if(input=="?")
 			std::cout<<"Enter coordinates as x,y values, EXIT\n";
+		
 		const bool isValidCoordinate = IsCoordinate(input, coordinate); 
 		if (isValidCoordinate == false) 
-		{ 
-		  std::cout << "ILLEGAL\n";
-		  continue; 
+		{
+		    if(input=="UNDO"){
+		        if(!game.DoUndo()){
+		            assert(!"CANNOT UNDO, NOT ENOUGH STATES IN STACK");
+		            std::cout<<"ILLEGAL\n";
+		            continue;
+				}
+		    }else if(input=="REDO"){
+		        if(!game.DoRedo()){
+		            assert(!"CANNOT REDO, NOT ENOUGH STATES IN STACK");
+		            std::cout<<"ILLEGAL\n";
+		            continue;
+		        }
+		    }else{
+				std::cout << "ILLEGAL\n";
+				continue;
+			} 
 		} 
 		if (game.IsValidMove(coordinate.first, coordinate.second, player) == false) 
 		{ 
@@ -256,3 +281,6 @@ int main()
 	api("START");
 	return 0;
 }
+
+
+

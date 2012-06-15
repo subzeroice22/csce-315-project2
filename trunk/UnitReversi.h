@@ -5,10 +5,12 @@
 	Richel Bilderbeek 
 	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
 ---------------------------------------------------------------------------*/
-#ifndef UnitReversiH 
-#define UnitReversiH 
+#ifndef UNITREVERSI_H
+#define UNITREVERSI_H
 //--------------------------------------------------------------------------- 
-#include <vector> 
+#include <vector>
+#include <string>
+#include <stack>
 enum Square { empty, player1, player2 }; 
 //--------------------------------------------------------------------------- 
 struct Reversi 
@@ -23,10 +25,24 @@ struct Reversi
   const int GetSize() const; 
   const int Count(const Square player) const; 
   std::string setDifficulty;
-
+  ~Reversi(){
+    while(!boardHistory.empty()){
+        delete boardHistory.top();
+		boardHistory.pop();
+    }
+    while(!boardRedos.empty()){
+        delete boardRedos.top();
+		boardRedos.pop();
+    }
+  }
+	const bool DoUndo();
+	const bool DoRedo();
   private: 
   std::vector<std::vector<Square> > mBoard; 
+    std::stack<std::vector< std::vector<Square> >* > boardHistory; //on every doMove add to this
+    std::stack<std::vector< std::vector<Square> >* > boardRedos; //on every doMove, clear this
 
+	
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 
   const bool IsValidMoveUpLeft(const int x, const int y, const Square player) const; 
   const bool IsValidMoveLeft(const int x, const int y, const Square player) const; 
@@ -51,3 +67,5 @@ const Square GetSquareXy(const std::vector<std::vector<Square> >& board, const i
 const Square GetOtherPlayer(const Square player); 
 
 #endif 
+
+
