@@ -21,9 +21,11 @@ struct Reversi
   const std::vector< std::pair<int,int> > GetValidMoves(const Square player) const; 
   const int GetSize() const; 
   const int Count(const Square player) const; 
+  std::string setDifficulty;
 
   private: 
   std::vector<std::vector<Square> > mBoard; 
+
 
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 
   const bool IsValidMoveUpLeft(const int x, const int y, const Square player) const; 

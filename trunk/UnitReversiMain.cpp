@@ -1,7 +1,7 @@
 //--------------------------------------------------------------------------- 
 /* 
     Based on the Reversi Console by
-	Richel Bilderbeek 
+	Richel Bilderbeek http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
 */ 
 //---------------------------------------------------------------------------  
 //--------------------------------------------------------------------------- 
@@ -20,8 +20,8 @@ std::ostream& operator<<(std::ostream& os, const Square s)
   switch (s) 
   { 
     case empty  : os << "."; break; 
-    case player1: os << "1"; break; 
-    case player2: os << "2"; break; 
+    case player1: os << char(2); break; 
+    case player2: os << char(1); break; 
     default: assert(!"Should not get here"); break; 
   } 
   return os; 
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
       os << i%10; 
     } 
     os << std::endl; 
-  } 
+  }
   return os; 
 } 
 //--------------------------------------------------------------------------- 
@@ -87,7 +87,6 @@ const std::string GetInput()
   return s; 
 } 
 //--------------------------------------------------------------------------- 
-//From http://www.richelbilderbeek.nl/CppSeperateString.htm 
 const std::vector<std::string> SeperateString(std::string input, const char seperator) 
 { 
   assert(input.empty()==false); 
@@ -111,7 +110,7 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
   return result; 
 } 
 //--------------------------------------------------------------------------- 
-const bool IsCoordinat(const std::string& input, std::pair<int,int>& coordinat) 
+const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate) 
 { 
   if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
   if ( *(input.begin()) == ',' || *(input.end() - 1) == ',') return false; 
@@ -120,8 +119,8 @@ const bool IsCoordinat(const std::string& input, std::pair<int,int>& coordinat)
 
   const std::vector<std::string> v(SeperateString(input,',')); 
   if (v.size() != 2) return false; 
-  if (IsInt(v[0],coordinat.first)==false) return false; 
-  if (IsInt(v[1],coordinat.second)==false) return false; 
+  if (IsInt(v[0],coordinate.first)==false) return false; 
+  if (IsInt(v[1],coordinate.second)==false) return false; 
  return true; 
 
 } 
@@ -153,88 +152,107 @@ const int AskUserForBoardSize()
   } 
 } 
 //--------------------------------------------------------------------------- 
+int api(std::string commandLine)
+{
+
+	Square player; 
+	std::pair<int,int> coordinate;
+	int boardSize=8;
+	std::string difficulty="EASY";
+	std::cout<< "WELCOME\n";
+	while(1){
+		const std::string input = GetInput();
+		if(input=="EXIT")
+			return 0;
+		if(input=="WHITE"){
+			player = player1; 
+			std::cout<<"WHITE\n";
+		}
+		if(input=="BLACK"){
+			player = player2;
+			std::cout<<"BLACK\n";
+		}
+		if(input=="EASY"){
+			difficulty="EASY";
+			std::cout<<"OK\n";
+		}
+		if(input=="MEDIUM"){
+			difficulty="MEDIUM";
+			std::cout<<"OK\n";
+		}
+		if(input=="HARD"){
+			difficulty="HARD";
+			std::cout<<"OK\n";
+		}
+		if(input=="DISPLAY_ON"){
+			std::cout<<"OK\n";
+			break;
+		}
+		if(input=="4X4"){
+			std::cout<<"OK\n";
+			boardSize=4;
+		}
+		if(input=="8X8"){
+			std::cout<<"OK\n";
+			boardSize=8;
+		}
+		if(input=="?"){
+			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, 4X4, 8X8, EXIT\n";
+		}
+	}
+	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
+	game.setDifficulty=difficulty;
+	while(1){
+		std::cout<< game;
+		const std::string input = GetInput();
+		if(input=="EXIT")
+			return 0;
+		if(input=="?")
+			std::cout<<"Enter coordinates as x,y values, EXIT\n";
+		const bool isValidCoordinate = IsCoordinate(input, coordinate); 
+		if (isValidCoordinate == false) 
+		{ 
+		  std::cout << "ILLEGAL\n";
+		  continue; 
+		} 
+		if (game.IsValidMove(coordinate.first, coordinate.second, player) == false) 
+		{ 
+		  std::cout << "ILLEGAL\n";
+		  continue; 
+		} 
+		//Actually do the move 
+		game.DoMove(coordinate.first, coordinate.second, player); 
+
+		//Check if the game has ended 
+		if (game.Count(empty) == 0) 
+		{ 
+		  //No empty squares 
+		  const int n1 = game.Count(player1); 
+		  const int n2 = game.Count(player2); 
+		  std::cout << "The game has ended." << std::endl 
+			<< "Player 1 conquered " << n1 << " squares." << std::endl 
+			<< "Player 2 conquered " << n2 << " squares." << std::endl 
+			<< "The winner is player " << (n1 > n2 ? "1" : "2") << std::endl 
+			<< "Congratulations!" << std::endl 
+			<< std::endl;
+		} 
+
+		//Check if other player can actually do a move 
+	if (game.GetValidMoves(player).empty()==true) 
+		{ 
+		  std::cout << "Too bad! Player " << player << " is unabled to do a valid move!"; 
+		  player = (player == player1 ? player2 : player1); 
+		  std::cout << "\nThe next turn again goes to player " << player << "!" << std::endl; 
+		  continue; 
+		} 
+
+		player = (player == player1 ? player2 : player1); 
+	}
+}
+
+
 int main() 
-{ 
-  std::cout 
-    << "***********" << std::endl 
-    << "* REVERSI *" << std::endl 
-    << "***********" << std::endl 
-    << std::endl; 
-     
-  Reversi r(AskUserForBoardSize()); 
-  Square player = player1; 
-
-  while (1) 
-  { 
-    std::cout 
-      << "\nThe board's current state: " << std::endl 
-      << r << std::endl 
-      << "It is player " << player << "'s turn." 
-      << "Please enter a coordinat, 'p' to pass or 'q' to quit" 
-      << std::endl; 
-
-    const std::string input = GetInput(); 
-
-    if (input == "q") 
-    { 
-      //Quit 
-      return 0; 
-    } 
-    if (input == "p") 
-    { 
-      //Pass 
-      player = (player == player1? player2 : player1); 
-      continue; 
-    } 
-
-
-    std::pair<int,int> coordinat; 
-    const bool isValidCoordinat = IsCoordinat(input, coordinat); 
-
-    if (isValidCoordinat == false) 
-    { 
-      std::cout 
-        << "Please enter a correctly formatted coordinat." 
-        << "\nFor example:  1,2  " << std::endl; 
-      continue; 
-    } 
-    if (r.IsValidMove(coordinat.first, coordinat.second, player) == false) 
-    { 
-      std::cout 
-        << "Please enter a valid coordinat." << std::endl; 
-      continue; 
-    } 
-    //Actually do the move 
-    r.DoMove(coordinat.first, coordinat.second, player); 
-
-    //Check if the game has ended 
-    if (r.Count(empty) == 0) 
-    { 
-      //No empty squares 
-      const int n1 = r.Count(player1); 
-      const int n2 = r.Count(player2); 
-      std::cout << "The game has ended." << std::endl 
-        << "Player 1 conquered " << n1 << " squares." << std::endl 
-        << "Player 2 conquered " << n2 << " squares." << std::endl 
-        << "The winner is player " << (n1 > n2 ? "1" : "2") << std::endl 
-        << "Congratulations!" << std::endl 
-        << std::endl 
-        << "Press any key to quit. " << std::endl; 
-
-      std::cin.get(); 
-      return 0; //Terminate the program 
-    } 
-
-    //Check if other player can actually do a move 
-    if (r.GetValidMoves(player).empty()==true) 
-    { 
-      std::cout << "Too bad! Player " << player << " is unabled to do a valid move!"; 
-      player = (player == player1 ? player2 : player1); 
-      std::cout << "\nThe next turn again goes to player " << player << "!" << std::endl; 
-      continue; 
-    } 
-
-    player = (player == player1 ? player2 : player1); 
-  } 
-} 
-//
+{
+	api("START");
+	return 0;
+}
