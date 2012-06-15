@@ -167,6 +167,7 @@ int api(std::string commandLine)
 	Square player=player1; 
 	std::pair<int,int> coordinate;
 	int boardSize=8;
+	bool display=true;
 	std::string difficulty="EASY";
 	std::cout<< "WELCOME\n";
 	while(1){
@@ -194,6 +195,12 @@ int api(std::string commandLine)
 			std::cout<<"OK\n";
 		}
 		if(input=="DISPLAY_ON" || input =="1"){
+			display = true;
+			std::cout<<"OK\n";
+			break;
+		}
+		if(input=="DISPLAY_OFF"){
+			display = false;
 			std::cout<<"OK\n";
 			break;
 		}
@@ -217,13 +224,18 @@ int api(std::string commandLine)
 	game.setDifficulty=difficulty;
 	while(1){
 		std::cout<<"Current Player:"<<player<<"\n";
-		std::cout<< game;
+		if(display==true)
+			std::cout<< game;
 		const std::string input = GetInput();
 		if(input=="EXIT")
 			return 0;
 		if(input=="?")
 			std::cout<<"Enter coordinates as # alpha values, EXIT\n";
-		
+		if(input=="DISPLAY_OFF"){
+			display = false;
+			std::cout<<"OK\n";
+			break;
+		}
 		const bool isValidCoordinate = IsCoordinate(input, coordinate); 
 		if (isValidCoordinate == false) 
 		{
