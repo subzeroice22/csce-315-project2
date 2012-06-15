@@ -239,7 +239,16 @@ int api(std::string commandLine)
 		            std::cout<<"ILLEGAL\n";
 		            continue;
 		        }continue;
-		    }else{
+		    }else if(input=="SHOW_NEXT_POS"){
+				Reversi tempValid(boardSize);
+				tempValid.SetBoard(game.GetBoard());
+				std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+				for(int i=0; i<vals.size(); i++){
+					tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
+				}
+				std::cout<<tempValid<<"\n";
+				continue;
+			}else{
 				std::cout << "ILLEGAL\n";
 				continue;
 			} 
