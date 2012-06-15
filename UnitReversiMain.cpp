@@ -19,7 +19,7 @@ std::ostream& operator<<(std::ostream& os, const Square s)
 { 
   switch (s) 
   { 
-    case empty  : os <<GREEN<<"_"<<GREEN; break; 
+    case empty  : os <<GREEN<<"_"; break; 
 	case validMove: os <<BOLDYELLOW<<"x"<<RESET<<GREEN; break;
     case player1: os <<BOLDBLACK<<"O"<<RESET<<GREEN; break; //char(2); break; 
     case player2: os <<BOLDWHITE<<"@"<<RESET<<GREEN; break; //char(1); break; 
@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
       row!=lastRow; 
       ++row, ++i) 
     { 
-      os << WHITE<<(i+1) <<GREEN<<"|"; 
+      os << WHITE<<(i+1) <<GREEN<<"|"<<RESET; 
       std::copy( (*row).begin(), (*row).end(),std::ostream_iterator<Square>(os,"|")); 
       os<<"\n"<<RESET;
       //os << " " << (i%10) << '\n'; 
@@ -210,8 +210,8 @@ int api(std::string commandLine)
 		}
 	}
 	
-	std::cout<<"Player1"<<"BLACK"<<player1<<"\n";
-	std::cout<<"Player2"<<"WHITE"<<player2<<"\n";
+	std::cout<<"Player1"<<"BLACK"<<player1<<"\n"<<RESET;
+	std::cout<<"Player2"<<"WHITE"<<player2<<"\n"<<RESET;
 	
 	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
 	game.setDifficulty=difficulty;
