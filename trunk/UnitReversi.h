@@ -26,7 +26,6 @@ struct Reversi
   private: 
   std::vector<std::vector<Square> > mBoard; 
 
-
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 
   const bool IsValidMoveUpLeft(const int x, const int y, const Square player) const; 
   const bool IsValidMoveLeft(const int x, const int y, const Square player) const; 
