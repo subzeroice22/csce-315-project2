@@ -13,6 +13,7 @@
 #include <iterator> 
 #include <memory> 
 #include <sstream> 
+#include <time.h>
 #include "UnitReversi.h"//#includes <vector>
 //<< override for Reversi object squares
 std::ostream& operator<<(std::ostream& os, const Square s) 
@@ -166,7 +167,7 @@ int api(std::string commandLine)
 {
 	Square player=player1; 
 	std::pair<int,int> coordinate;
-	int boardSize=8;
+	int boardSize=8,randomMove;
 	bool display=true;
 	std::string difficulty="EASY";
 	for(int i=0;i<100;i++)std::cout<<"\n";
@@ -261,6 +262,15 @@ int api(std::string commandLine)
 				}
 				std::cout<<tempValid<<"\n";
 				continue;
+			}else if(input=="RAND"){
+				Reversi tempValid(boardSize);
+				tempValid.SetBoard(game.GetBoard());
+				std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+				randomMove = rand() % vals.size();
+				//game.DoMove(vals[randomMove].first,vals[randomMove].second,player);
+				coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
+				isValidCoordinate == true;
+				std::cout<<tempValid<<"\n";
 			}else{
 				std::cout << "ILLEGAL\n";
 				continue;
