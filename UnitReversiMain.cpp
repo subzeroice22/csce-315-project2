@@ -169,6 +169,7 @@ int api(std::string commandLine)
 	int boardSize=8;
 	bool display=true;
 	std::string difficulty="EASY";
+	for(int i=0;i<100;i++)std::cout<<"\n";
 	std::cout<< "WELCOME\n";
 	while(1){
 		const std::string input = GetInput();
@@ -230,7 +231,7 @@ int api(std::string commandLine)
 		if(input=="EXIT")
 			return 0;
 		if(input=="?")
-			std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, EXIT\n";
+			std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
 		if(input=="DISPLAY_OFF"){
 			display = false;
 			std::cout<<"OK\n";

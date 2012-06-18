@@ -30,7 +30,7 @@ enum Square { empty, player1, player2, validMove };
 #define BOLDMAGENTA "\033[1m\033[35m"      
 #define BOLDCYAN    "\033[1m\033[36m"     
 #define BOLDWHITE   "\033[1m\033[37m"      
----------------------------------------------------------------------------//
+//---------------------------------------------------------------------------
 /*/the following is for testing in a windows console
 #define RESET   ""
 #define BLACK   ""      
