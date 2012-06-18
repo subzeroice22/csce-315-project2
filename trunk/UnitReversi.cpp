@@ -89,7 +89,9 @@ void Reversi::DoMove(const int x, const int y, const Square player) {
   if (IsValidMoveUpRight(  x,y,player) == true) DoMoveUpRight(  x+1,y-1,player); 
   SetSquare(x,y,player); 
 } 
-const bool Reversi::IsValidMove(const int x, const int y, const Square player) const { 
+const bool Reversi::IsValidMove(const int x, const int y, const Square player) const {
+	if(GetSquare(x,y)!=empty)
+		return false;
   if (IsValidMoveUp(       x,y,player)==true) return true; 
   if (IsValidMoveUpLeft(   x,y,player)==true) return true; 
   if (IsValidMoveLeft(     x,y,player)==true) return true; 

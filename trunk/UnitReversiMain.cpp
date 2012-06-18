@@ -230,7 +230,7 @@ int api(std::string commandLine)
 		if(input=="EXIT")
 			return 0;
 		if(input=="?")
-			std::cout<<"Enter coordinates as # alpha values, EXIT\n";
+			std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, EXIT\n";
 		if(input=="DISPLAY_OFF"){
 			display = false;
 			std::cout<<"OK\n";
