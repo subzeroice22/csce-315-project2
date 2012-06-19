@@ -12,7 +12,7 @@
 #include <string>
 #include <stack>
 enum Square { empty, player1, player2, validMove }; 
-/*the following are UBUNTU/LINUX ONLY terminal color codes.
+//the following are UBUNTU/LINUX ONLY terminal color codes.
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"     
 #define RED     "\033[31m"     
@@ -30,8 +30,8 @@ enum Square { empty, player1, player2, validMove };
 #define BOLDMAGENTA "\033[1m\033[35m"      
 #define BOLDCYAN    "\033[1m\033[36m"     
 #define BOLDWHITE   "\033[1m\033[37m"      
-//-------------------------------------------------------------------------*/
-//the following is for testing in a windows console
+//-------------------------------------------------------------------------//
+/*the following is for testing in a windows console
 #define RESET   ""
 #define BLACK   ""      
 #define RED     ""      
@@ -49,19 +49,20 @@ enum Square { empty, player1, player2, validMove };
 #define BOLDMAGENTA ""    
 #define BOLDCYAN    ""      
 #define BOLDWHITE   ""      
-//-------------------------------------------------------------------------//
+//-------------------------------------------------------------------------*/
 struct Reversi 
 { 
   Reversi(const int size); 
   const std::vector<std::vector<Square> >& GetBoard() const; 
   const Square GetSquare(const int x, const int y) const; 
-  void DoMove(const int x, const int y, const Square player); 
+  void DoMove(const int x, const int y, const Square player);   
   void SetSquare(const int x, const int y, const Square player); 
+  void setSize(const int newSize);
   const bool IsValidMove(const int x, const int y, const Square player) const; 
   const std::vector< std::pair<int,int> > GetValidMoves(const Square player) const; 
   const int GetSize() const; 
   const int Count(const Square player) const; 
-  std::string setDifficulty;
+
   ~Reversi(){
     while(!boardHistory.empty()){
         delete boardHistory.top();
@@ -79,7 +80,7 @@ struct Reversi
   std::vector<std::vector<Square> > mBoard; 
     std::stack<std::vector< std::vector<Square> >* > boardHistory; 
     std::stack<std::vector< std::vector<Square> >* > boardRedos;
-
+	int size;
 	
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 
   const bool IsValidMoveUpLeft(const int x, const int y, const Square player) const; 

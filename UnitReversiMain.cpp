@@ -14,7 +14,15 @@
 #include <memory> 
 #include <sstream> 
 #include <time.h>
+#include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
+//global variables - created to prepare for port to Java
+int boardSize=8,randomMove,isHuman;
+bool displayOn=true;
+std::string AIlevel = "OFF";
+Square player=player1,AIPlayer=player2,humanPlayer=player1; 
+Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
+std::pair<int,int> coordinate;
 //<< override for Reversi object squares
 std::ostream& operator<<(std::ostream& os, const Square s) 
 { 
@@ -69,9 +77,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r)
   }
   return os; 
 } 
-//Checks whether a std::string can be converted to an integer. 
-//Returns true if possible, also returning this integer by referencing. 
-//Returns false otherwise, setting the referenced integer to zero. 
+//Returns true if the string can be converted to integers
 const bool IsInt(const std::string& s, int& rInt) 
 { 
   std::istringstream i(s); 
@@ -85,9 +91,15 @@ const bool IsInt(const std::string& s, int& rInt)
 //Handles all input and drops the newline char
 const std::string GetInput() 
 { 
-  std::string s; 
-  std::getline(std::cin,s,'\n'); 
-  return s; 
+	char c;
+	std::string s; 
+	std::getline(std::cin,s,'\n'); 
+	for(int i=0;i<s.size();i++){
+		c=s[i];
+		s[i]=toupper(c);
+	}
+
+	return s; 
 } 
 //Breaks up the coordinate input for an x and y value
 const std::vector<std::string> SeperateString(std::string input, const char seperator) 
@@ -117,23 +129,11 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
     if(input.size()!=2) return false;
 	//TODO: need error (bounds) checking on x and y
     int x, y;
-    x = input[0] - 'a';
+    x = input[0] - 'A';
     y = int(input[1] - '0')-1;
     coordinate.first=x;
 	coordinate.second=y;
     return true;
-
-/*  if ( std::count(input.begin(), input.end(), ',') != 1) return false; 
-  if ( *(input.begin()) == ',' || *(input.end() - 1) == ',') return false; 
-  const std::string::const_iterator i = std::find(input.begin(), input.end(), ','); 
-  assert(i != input.end() ); //Comma must be in! Checked above! 
-
-  const std::vector<std::string> v(SeperateString(input,','));
-  if (v.size() != 2) return false; 
-  if (IsInt(v[0],coordinate.first)==false) return false; 
-  if (IsInt(v[1],coordinate.second)==false) return false; 
- return true; */
-
 } 
 //Optional menu option allowing for board sizes between 4X4 and 16X16
 const int AskUserForBoardSize() 
@@ -162,16 +162,8 @@ const int AskUserForBoardSize()
     return size; 
   } 
 } 
-//Handles user input and display of data 
-int api(std::string commandLine)
-{
-	Square player=player1,AIPlayer=player2,humanPlayer=player1; 
-	std::pair<int,int> coordinate;
-	int boardSize=8,randomMove,isHuman;
-	bool display=true;
-	std::string AI="OFF";
-	for(int i=0;i<100;i++)std::cout<<"\n";
-	std::cout<< "WELCOME\n";
+
+int handlePregameInput(){
 	while(1){
 		const std::string input = GetInput();
 		if(input=="EXIT")
@@ -187,24 +179,24 @@ int api(std::string commandLine)
 			std::cout<<"WHITE\n";
 		}
 		if(input=="EASY"){
-			AI="EASY";
+			AIlevel="EASY";
 			std::cout<<"OK\n";
 		}
 		if(input=="MEDIUM"){
-			AI="MEDIUM";
+			AIlevel="MEDIUM";
 			std::cout<<"OK\n";
 		}
 		if(input=="HARD"){
-			AI="HARD";
+			AIlevel="HARD";
 			std::cout<<"OK\n";
 		}
 		if(input=="DISPLAY_ON" || input =="1"){
-			display = true;
+			displayOn = true;
 			std::cout<<"OK\n";
 			break;
 		}
 		if(input=="DISPLAY_OFF"){
-			display = false;
+			displayOn = false;
 			std::cout<<"OK\n";
 			break;
 		}
@@ -217,41 +209,53 @@ int api(std::string commandLine)
 			boardSize=8;
 		}
 		if(input=="?"){
-			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, 4X4, 8X8, EXIT\n";
+			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n";
 		}
 	}
-	std::cout<<"Player1"<<"BLACK"<<player1<<"\n"<<RESET;
-	std::cout<<"Player2"<<"WHITE"<<player2<<"\n"<<RESET;
-	
-	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
-	game.setDifficulty=AI;
+	return 1;
+}
 
+void showPossibleMoves(){
+	Reversi tempValid(boardSize);
+	tempValid.SetBoard(game.GetBoard());
+	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+	for(int i=0; i<vals.size(); i++)
+		tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
+	std::cout<<tempValid<<"\n";
+}
+
+void moveRandomly(){
+	Reversi tempValid(boardSize);
+	tempValid.SetBoard(game.GetBoard());
+	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+	int randomMove = rand() % vals.size();
+	coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
+}
+
+int handleGameInput(){
 	while(1){
 		std::cout<<"Current Player:"<<player<<"\n";
-		if(display==true)
+		if(displayOn==true)
 			std::cout<< game;
-		if(AI!="OFF"&&player==AIPlayer){
-			Reversi tempValid(boardSize);
-			tempValid.SetBoard(game.GetBoard());
-			std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
-			randomMove = rand() % vals.size();
-			coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
-			std::cout<<tempValid<<"\n";
+		if(AIlevel!="OFF"&&player==AIPlayer){
+			moveRandomly();
 		}
 		else {
 			const std::string input = GetInput();
-			if(input=="EXIT")
-				return 0;
-			if(input=="?")
-				std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
-			if(input=="DISPLAY_OFF"){
-				display = false;
-				std::cout<<"OK\n";
-				break;
-			}
 			const bool isValidCoordinate = IsCoordinate(input, coordinate); 
 			if (isValidCoordinate == false) 
 			{
+				if(input=="EXIT")
+					return 0;
+				else if(input=="?"){
+					std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
+					continue;
+				}
+				else if(input=="DISPLAY_OFF"){
+					displayOn = false;
+					std::cout<<"OK\n";
+					continue;
+				}
 				if(input=="UNDO"){
 					if(!game.DoUndo()){
 						assert(!"CANNOT UNDO, NOT ENOUGH STATES IN STACK");
@@ -265,21 +269,10 @@ int api(std::string commandLine)
 						continue;
 					}continue;
 				}else if(input=="SHOW_NEXT_POS"){
-					Reversi tempValid(boardSize);
-					tempValid.SetBoard(game.GetBoard());
-					std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
-					for(int i=0; i<vals.size(); i++){
-						tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
-					}
-					std::cout<<tempValid<<"\n";
+					showPossibleMoves();
 					continue;
 				}else if(input=="RAND"){
-					Reversi tempValid(boardSize);
-					tempValid.SetBoard(game.GetBoard());
-					std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
-					randomMove = rand() % vals.size();
-					//game.DoMove(vals[randomMove].first,vals[randomMove].second,player);
-					coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
+					moveRandomly();
 				}else{
 					std::cout << "ILLEGAL\n";
 					continue;
@@ -290,7 +283,7 @@ int api(std::string commandLine)
 		{ 
 		  std::cout << "ILLEGAL\n";
 		  continue; 
-		} 
+		}
 		//Actually do the move 
 		game.DoMove(coordinate.first, coordinate.second, player); 
 
@@ -306,6 +299,7 @@ int api(std::string commandLine)
 			<< "The winner is player " << (n1 > n2 ? "1" : "2") << std::endl 
 			<< "Congratulations!" << std::endl 
 			<< std::endl;
+		  return 1;
 		} 
 
 		//Check if other player can actually do a move 
@@ -321,6 +315,19 @@ int api(std::string commandLine)
 		//foreach pair m in getValidMoves; setSquare(m , validMove);
 		
 	}
+	return 0;
+}
+//Handles user input and display of data 
+int api(std::string commandLine)
+{
+	for(int i=0;i<100;i++)std::cout<<"\n";
+	std::cout<< "WELCOME\n";
+	if(!handlePregameInput())
+		return 0;
+	std::cout<<"Player1"<<"BLACK"<<player1<<"\n"<<RESET;
+	std::cout<<"Player2"<<"WHITE"<<player2<<"\n"<<RESET;
+	if(!handleGameInput())
+		return 0;
 }
 
 int main() 

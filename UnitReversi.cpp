@@ -47,6 +47,10 @@ void Reversi::SetSquare(const int x, const int y, const Square player) {
 
   assert(GetSquare(x,y)==player); //terminates program if coord is NULL
 } 
+
+ void Reversi::setSize(const int newSize){
+	 int size = newSize;
+ }
 //Perfoms a reverse of the last two moves
 const bool Reversi::DoUndo(){
     if(boardHistory.size()<2) return false;
