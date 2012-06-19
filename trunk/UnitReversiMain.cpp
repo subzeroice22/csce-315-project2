@@ -165,11 +165,11 @@ const int AskUserForBoardSize()
 //Handles user input and display of data 
 int api(std::string commandLine)
 {
-	Square player=player1; 
+	Square player=player1,AIPlayer=player2,humanPlayer=player1; 
 	std::pair<int,int> coordinate;
-	int boardSize=8,randomMove;
+	int boardSize=8,randomMove,isHuman;
 	bool display=true;
-	std::string difficulty="EASY";
+	std::string AI="OFF";
 	for(int i=0;i<100;i++)std::cout<<"\n";
 	std::cout<< "WELCOME\n";
 	while(1){
@@ -177,23 +177,25 @@ int api(std::string commandLine)
 		if(input=="EXIT")
 			return 0;
 		if(input=="BLACK"){
-			player = player1; 
+			player = player1;
+			AIPlayer=player2;
 			std::cout<<"BLACK\n";
 		}
 		if(input=="WHITE"){
 			player = player2;
+			AIPlayer=player1;
 			std::cout<<"WHITE\n";
 		}
 		if(input=="EASY"){
-			difficulty="EASY";
+			AI="EASY";
 			std::cout<<"OK\n";
 		}
 		if(input=="MEDIUM"){
-			difficulty="MEDIUM";
+			AI="MEDIUM";
 			std::cout<<"OK\n";
 		}
 		if(input=="HARD"){
-			difficulty="HARD";
+			AI="HARD";
 			std::cout<<"OK\n";
 		}
 		if(input=="DISPLAY_ON" || input =="1"){
@@ -218,63 +220,71 @@ int api(std::string commandLine)
 			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, 4X4, 8X8, EXIT\n";
 		}
 	}
-	
 	std::cout<<"Player1"<<"BLACK"<<player1<<"\n"<<RESET;
 	std::cout<<"Player2"<<"WHITE"<<player2<<"\n"<<RESET;
 	
 	Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
-	game.setDifficulty=difficulty;
+	game.setDifficulty=AI;
+
 	while(1){
 		std::cout<<"Current Player:"<<player<<"\n";
 		if(display==true)
 			std::cout<< game;
-		const std::string input = GetInput();
-		if(input=="EXIT")
-			return 0;
-		if(input=="?")
-			std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
-		if(input=="DISPLAY_OFF"){
-			display = false;
-			std::cout<<"OK\n";
-			break;
+		if(AI!="OFF"&&player==AIPlayer){
+			Reversi tempValid(boardSize);
+			tempValid.SetBoard(game.GetBoard());
+			std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+			randomMove = rand() % vals.size();
+			coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
+			std::cout<<tempValid<<"\n";
 		}
-		const bool isValidCoordinate = IsCoordinate(input, coordinate); 
-		if (isValidCoordinate == false) 
-		{
-		    if(input=="UNDO"){
-		        if(!game.DoUndo()){
-		            assert(!"CANNOT UNDO, NOT ENOUGH STATES IN STACK");
-		            std::cout<<"ILLEGAL\n";
-		            continue;
-				}continue;
-		    }else if(input=="REDO"){
-		        if(!game.DoRedo()){
-		            assert(!"CANNOT REDO, NOT ENOUGH STATES IN STACK");
-		            std::cout<<"ILLEGAL\n";
-		            continue;
-		        }continue;
-		    }else if(input=="SHOW_NEXT_POS"){
-				Reversi tempValid(boardSize);
-				tempValid.SetBoard(game.GetBoard());
-				std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
-				for(int i=0; i<vals.size(); i++){
-					tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
-				}
-				std::cout<<tempValid<<"\n";
-				continue;
-			}else if(input=="RAND"){
-				Reversi tempValid(boardSize);
-				tempValid.SetBoard(game.GetBoard());
-				std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
-				randomMove = rand() % vals.size();
-				//game.DoMove(vals[randomMove].first,vals[randomMove].second,player);
-				coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
-				isValidCoordinate == true;
-				std::cout<<tempValid<<"\n";
-			}else{
-				std::cout << "ILLEGAL\n";
-				continue;
-			} 
+		else {
+			const std::string input = GetInput();
+			if(input=="EXIT")
+				return 0;
+			if(input=="?")
+				std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
+			if(input=="DISPLAY_OFF"){
+				display = false;
+				std::cout<<"OK\n";
+				break;
+			}
+			const bool isValidCoordinate = IsCoordinate(input, coordinate); 
+			if (isValidCoordinate == false) 
+			{
+				if(input=="UNDO"){
+					if(!game.DoUndo()){
+						assert(!"CANNOT UNDO, NOT ENOUGH STATES IN STACK");
+						std::cout<<"ILLEGAL\n";
+						continue;
+					}continue;
+				}else if(input=="REDO"){
+					if(!game.DoRedo()){
+						assert(!"CANNOT REDO, NOT ENOUGH STATES IN STACK");
+						std::cout<<"ILLEGAL\n";
+						continue;
+					}continue;
+				}else if(input=="SHOW_NEXT_POS"){
+					Reversi tempValid(boardSize);
+					tempValid.SetBoard(game.GetBoard());
+					std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+					for(int i=0; i<vals.size(); i++){
+						tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
+					}
+					std::cout<<tempValid<<"\n";
+					continue;
+				}else if(input=="RAND"){
+					Reversi tempValid(boardSize);
+					tempValid.SetBoard(game.GetBoard());
+					std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
+					randomMove = rand() % vals.size();
+					//game.DoMove(vals[randomMove].first,vals[randomMove].second,player);
+					coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
+				}else{
+					std::cout << "ILLEGAL\n";
+					continue;
+				} 
+			}
 		} 
 		if (game.IsValidMove(coordinate.first, coordinate.second, player) == false) 
 		{ 
