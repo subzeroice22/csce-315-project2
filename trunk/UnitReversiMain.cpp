@@ -286,16 +286,17 @@ int checkForMin(Reversi tempGame, Square forcastPlayer){
 	tempValid.SetBoard(tempGame.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
 	for(int possibleOpponentMove=0;possibleOpponentMove<vals.size();possibleOpponentMove++){
+		Reversi tempValid(boardSize);
+		tempValid.SetBoard(tempGame.GetBoard());
+	//	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
 		tempValid.DoMove(vals[possibleOpponentMove].first,vals[possibleOpponentMove].second, forcastPlayer);
+		std::cout<<tempValid<<possibleOpponentMove<<"\n";
 		if(tempValid.Count(forcastPlayer)<count){
 			count=tempValid.Count(forcastPlayer);
 			minPossibleMove=possibleOpponentMove;
 		}
 	}
-
-
 	return count;
-
 }
 std::pair<int,int> checkForMax(Reversi tempGame, Square forcastPlayer){
 	Reversi tempValid(boardSize);
@@ -304,16 +305,19 @@ std::pair<int,int> checkForMax(Reversi tempGame, Square forcastPlayer){
 	tempValid.SetBoard(tempGame.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){														
+		Reversi tempValid(boardSize);
+		tempValid.SetBoard(tempGame.GetBoard());
+//		std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
+
 		tempValid.DoMove(vals[possibleMove].first, vals[possibleMove].second, forcastPlayer);
+		std::cout<<tempValid<<possibleMove<<"\n";
 		nextPlayer = (forcastPlayer == player1 ? player2 : player1);
 		countMin=checkForMin(tempValid,nextPlayer);
 		if(countMin>countMax){
 			countMax=countMin;
 			maxPossibleMove=possibleMove;
 		}
-
 	}
-
 	return vals[maxPossibleMove];
 }
 
