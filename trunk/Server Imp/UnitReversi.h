@@ -77,6 +77,9 @@ struct Reversi
 	const bool DoUndo();
 	const bool DoRedo();
 	void SetBoard(std::vector<std::vector<Square> > newBoard); 
+	
+	std::string toString();
+	
   private: 
   std::vector<std::vector<Square> > mBoard; 
     std::stack<std::vector< std::vector<Square> >* > boardHistory; 

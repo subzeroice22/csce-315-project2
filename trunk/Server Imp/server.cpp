@@ -38,14 +38,14 @@ int main() {
 	listen(sock, 1);
 	client_length = sizeof(client_address);
 
-	//accept connections
+	cout << "Server socket:\t" << sock << '\n';
 	
+	//accept connections	
 	client_sock = accept(sock, (struct sockaddr *)&client_address, (socklen_t*)&client_length);
 		
 	//send client connection message, check if send() was successful
 	int send_status = send(client_sock, "null", 0, 0);	
 	
-	cout << "Server socket:\t" << sock << '\n';
 	cout << "Send status:\t" << send_status << '\n';
 	cout << "Client socket:\t" << client_sock << '\n';
 	
