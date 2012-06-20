@@ -64,6 +64,7 @@ struct Reversi
   const int Count(const Square player) const; 
 
   ~Reversi(){
+  /*
     while(!boardHistory.empty()){
         delete boardHistory.top();
 		boardHistory.pop();
@@ -72,14 +73,17 @@ struct Reversi
         delete boardRedos.top();
 		boardRedos.pop();
     }
+	*/
   }
 	const bool DoUndo();
 	const bool DoRedo();
 	void SetBoard(std::vector<std::vector<Square> > newBoard); 
   private: 
   std::vector<std::vector<Square> > mBoard; 
-    std::stack<std::vector< std::vector<Square> >* > boardHistory; 
-    std::stack<std::vector< std::vector<Square> >* > boardRedos;
+    //std::stack<std::vector< std::vector<Square> >* > boardHistory; 
+    //std::stack<std::vector< std::vector<Square> >* > boardRedos;
+    std::stack<std::vector< std::vector<Square> > > boardHistory; 
+    std::stack<std::vector< std::vector<Square> > > boardRedos;
 	int size;
 	
   const bool IsValidMoveUp(const int x, const int y, const Square player) const; 

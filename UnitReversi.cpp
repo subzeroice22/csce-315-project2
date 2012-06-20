@@ -54,22 +54,26 @@ void Reversi::SetSquare(const int x, const int y, const Square player) {
 //Perfoms a reverse of the last two moves
 const bool Reversi::DoUndo(){
     if(boardHistory.size()<2) return false;
-    boardRedos.push(new std::vector< std::vector< Square > >(mBoard) );
+    //boardRedos.push(new std::vector< std::vector< Square > >(mBoard) );
+	boardRedos.push(std::vector< std::vector< Square > >(mBoard) );
 	boardRedos.push(boardHistory.top());
 	boardHistory.pop();
-	mBoard = (*boardHistory.top());
-	delete boardHistory.top();
+	//mBoard = (*boardHistory.top());
+	mBoard = (boardHistory.top());
+	//delete boardHistory.top();
 	boardHistory.pop();
     return true;
 }
 //restores two moves that had been reversed
 const bool Reversi::DoRedo(){
     if(boardRedos.size()<2) return false;
-    boardHistory.push(new std::vector< std::vector<Square> >(mBoard));
+    //boardHistory.push(new std::vector< std::vector<Square> >(mBoard));
+	boardHistory.push(std::vector< std::vector<Square> >(mBoard));
 	boardHistory.push(boardRedos.top());
 	boardRedos.pop();
-	mBoard =  (*boardRedos.top());
-	delete boardRedos.top();
+	//mBoard =  (*boardRedos.top());
+	mBoard =  (boardRedos.top());
+	//delete boardRedos.top();
 	boardRedos.pop();
 	return true;
 	
@@ -78,9 +82,10 @@ const bool Reversi::DoRedo(){
 //Checks IsValidMove and then  
 void Reversi::DoMove(const int x, const int y, const Square player) { 
   assert(IsValidMove(x,y,player)==true || "Invalid move!"); 
-    boardHistory.push( new std::vector< std::vector<Square> >(mBoard));
+    //boardHistory.push( new std::vector< std::vector<Square> >(mBoard));
+	boardHistory.push(std::vector< std::vector<Square> >(mBoard));
     while(!boardRedos.empty()){
-        delete boardRedos.top();
+        //delete boardRedos.top();
 		boardRedos.pop();
     }
   if (IsValidMoveUp(       x,y,player) == true) DoMoveUp(       x  ,y-1,player); 
