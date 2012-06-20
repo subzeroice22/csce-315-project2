@@ -162,8 +162,6 @@ int handlePregameInput(int client){
 		char input[30];
 		int blorg = recv(client, input, 30, 0) << '\n';
 		
-		//input[blorg] = '\0';
-		
 		if(input=="EXIT")
 			return 0;
 		//if(input=="BLACK"){
@@ -198,30 +196,34 @@ int handlePregameInput(int client){
 			std::cout<<"OK\n";
 			send(client, "OK\n", 10, 0);
 		}
-		if(input=="DISPLAY_ON" || input =="1"){
+		//if(input=="DISPLAY_ON" || input =="1"){
+		if( strncmp(input, "DISPLAY_ON", 10) == 0 || strncmp(input, "1", 1) == 0) {
 			displayOn = true;
 			std::cout<<"OK\n";
 			send(client, "OK\n", 10, 0);
 			break;
 		}
-		if(input=="DISPLAY_OFF"){
+		//if(input=="DISPLAY_OFF"){
+		if( strncmp(input, "DISPLAY_OFF", 11) == 0) {
 			displayOn = false;
 			std::cout<<"OK\n";
 			send(client, "Ok\n", 10, 0);
 			break;
 		}
-		if(input=="4X4"){
+		//if(input=="4X4"){
+		if( strncmp(input, "4X4", 3) == 0) {
 			std::cout<<"OK\n";
 			send(client, "OK\n", 10, 0);
 			boardSize=4;
 		}
-		if(input=="8X8"){
+		//if(input=="8X8"){
+		if( strncmp(input, "8X8", 3) == 0) {
 			std::cout<<"OK\n";
 			send(client, "OK\n", 10, 0);
 			boardSize=8;
 		}
 		//if(input=="?"){
-		if( input[0] == '?') {
+		if( strncmp(input, "?", 1) == 0) {
 			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n";
 			send(client, "WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n", 100, 0);
 		}
@@ -249,10 +251,30 @@ void moveRandomly(){
 int handleGameInput(int client){
 	while(1){
 		std::cout<<"Current Player:"<<player<<"\n";
-		send(client, "Current Player: TODO\n", 30, 0);
+		
+		std::ostringstream playerStream;
+		playerStream << player;
+		std::string playerStr = "Current Player:" + playerStream.str() + "\n";
+		const char* playerChr = playerStr.c_str();
+		
+		send(client, playerChr, 30, 0);
 		if(displayOn==true)
-			std::cout<< game;
-			//right here!
+			std::cout<<game;
+			
+			//snippet that converts the game board to a string/c_string
+			std::ostringstream boardStream;
+			boardStream << game;
+			std::string boardStr = boardStream.str();
+			const char* boardChr = boardStr.c_str();
+			
+			//std::cout << "++++++++++++++++++++++\n";
+			//std::cout << game.toString();
+			//std::cout << "++++++++++++++++++++++\n";
+			
+			//sends the board to the client
+			//send(client, boardChr, 10, 0);
+			send(client, game.toString().c_str(), 200, 0);
+			
 		if(AIlevel!="OFF"&&player==AIPlayer){
 			moveRandomly();
 		}
