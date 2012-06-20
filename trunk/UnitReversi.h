@@ -52,7 +52,7 @@ enum Square { empty, player1, player2, validMove };
 //-------------------------------------------------------------------------//
 struct Reversi 
 { 
-  Reversi(const int size); 
+  Reversi(const int size=8); 
   const std::vector<std::vector<Square> >& GetBoard() const; 
   const Square GetSquare(const int x, const int y) const; 
   void DoMove(const int x, const int y, const Square player);   
@@ -63,7 +63,7 @@ struct Reversi
   const int GetSize() const; 
   const int Count(const Square player) const; 
 
-  ~Reversi(){
+ // ~Reversi(){
   
    /* while(!boardHistory.empty()){
         delete boardHistory.top();
@@ -74,7 +74,7 @@ struct Reversi
 		boardRedos.pop();
     }*/
 	
-  }
+ // }
 	const bool DoUndo();
 	const bool DoRedo();
 	void SetBoard(std::vector<std::vector<Square> > newBoard); 
