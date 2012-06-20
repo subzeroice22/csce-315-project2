@@ -17,12 +17,12 @@
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
 //global variables - created to prepare for port to Java
-int boardSize=8,randomMove,isHuman;
+int boardSize=8,randomMove,isHuman,moveDepth;
 bool displayOn=true;
 std::string AIlevel = "OFF";
 Square player=player1,AIPlayer=player2,humanPlayer=player1; 
 Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
-std::pair<int,int> coordinate;
+std::pair<int,int> coordinate,bestMove;
 //<< override for Reversi object squares
 std::ostream& operator<<(std::ostream& os, const Square s) 
 { 
@@ -232,13 +232,121 @@ void moveRandomly(){
 	coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
 }
 
+/*std::pair<int,int> forcastThenMove(Reversi previousBoard,Square forcastPlayer){
+	std::pair<int,int> countFromForcast;
+	std::pair<int,int> returnFromForcast;
+	std::pair<int,int> forcastCoordinate;
+	Square nextPlayer;
+	int highestDifferential=0;
+	Reversi tempValid(boardSize);
+	tempValid.SetBoard(previousBoard.GetBoard());
+	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
+	if (tempValid.Count(empty) == 0){
+			countFromForcast.first = tempValid.Count(player1); 
+			countFromForcast.second = tempValid.Count(player2); 
+			return countFromForcast;
+	}
+	if(vals.size()==0){
+		nextPlayer = (forcastPlayer == player1 ? player2 : player1);
+		returnFromForcast = forcastThenMove(tempValid,nextPlayer);
+	}
+	for(int i=0;i<vals.size();i++){
+		tempValid.DoMove(vals[i].first, vals[i].second, forcastPlayer); 
+		std::cout<< tempValid;
+		nextPlayer = (forcastPlayer == player1 ? player2 : player1);
+		moveDepth++;
+		if(moveDepth<10)
+			returnFromForcast = forcastThenMove(tempValid,nextPlayer);
+		if(player==player1){
+			if(returnFromForcast.first>returnFromForcast.second){
+				if(abs(returnFromForcast.first-returnFromForcast.second)>highestDifferential){
+					highestDifferential = abs(returnFromForcast.first-returnFromForcast.second);
+					bestMove=vals[i];
+				}
+				return returnFromForcast;
+			}
+		}
+		if(player==player2){
+			if(returnFromForcast.first<returnFromForcast.second){
+				if(abs(returnFromForcast.first-returnFromForcast.second)>highestDifferential){
+					highestDifferential = abs(returnFromForcast.first-returnFromForcast.second);
+					bestMove=vals[i];
+				}
+				return returnFromForcast;
+			}
+		}
+	}
+	return returnFromForcast;
+
+}*/
+int checkForMin(Reversi tempGame, Square forcastPlayer){
+	Reversi tempValid(boardSize);
+	int count=64,minPossibleMove=0;
+	Square nextPlayer;
+	tempValid.SetBoard(tempGame.GetBoard());
+	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
+	for(int possibleOpponentMove=0;possibleOpponentMove<vals.size();possibleOpponentMove++){
+		tempValid.DoMove(vals[possibleOpponentMove].first,vals[possibleOpponentMove].second, forcastPlayer);
+		if(tempValid.Count(forcastPlayer)<count){
+			count=tempValid.Count(forcastPlayer);
+			minPossibleMove=possibleOpponentMove;
+		}
+	}
+
+
+	return count;
+
+}
+std::pair<int,int> checkForMax(Reversi tempGame, Square forcastPlayer){
+	Reversi tempValid(boardSize);
+	int countMax=0,countMin=0,maxPossibleMove=0;
+	Square nextPlayer;
+	tempValid.SetBoard(tempGame.GetBoard());
+	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
+	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){														
+		tempValid.DoMove(vals[possibleMove].first, vals[possibleMove].second, forcastPlayer);
+		nextPlayer = (forcastPlayer == player1 ? player2 : player1);
+		countMin=checkForMin(tempValid,nextPlayer);
+		if(countMin>countMax){
+			countMax=countMin;
+			maxPossibleMove=possibleMove;
+		}
+
+	}
+
+	return vals[maxPossibleMove];
+}
+
+
+
+
+
+std::pair<int,int> minMax(Reversi tempGame, Square tempPlayer){
+	//check for valid moves first, if none just send turn to next player
+
+	std::pair<int,int> temp;
+
+	return temp;
+}
+
+
+
+
+
+
 int handleGameInput(){
 	while(1){
 		std::cout<<"Current Player:"<<player<<"\n";
 		if(displayOn==true)
 			std::cout<< game;
 		if(AIlevel!="OFF"&&player==AIPlayer){
-			moveRandomly();
+			if(AIlevel=="EASY")
+				moveRandomly();
+			if(AIlevel=="MEDIUM"){
+				moveDepth=0;
+				std::pair<int,int> bestMove = checkForMax(game,player);
+				coordinate.first=bestMove.first;coordinate.second=bestMove.second;
+			}
 		}
 		else {
 			const std::string input = GetInput();
