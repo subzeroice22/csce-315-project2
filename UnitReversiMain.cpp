@@ -18,6 +18,7 @@
 #include <time.h>
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
+#include "AI.h"
 //global variables - created to prepare for port to Java
 
 int boardSize=8,randomMove,isHuman,moveDepth;
@@ -325,10 +326,6 @@ std::pair<int,int> checkForMax(Reversi tempGame, Square forcastPlayer){
 	return vals[maxPossibleMove];
 }
 
-
-
-
-
 std::pair<int,int> minMax(Reversi tempGame, Square tempPlayer){
 	//check for valid moves first, if none just send turn to next player
 
@@ -336,11 +333,6 @@ std::pair<int,int> minMax(Reversi tempGame, Square tempPlayer){
 
 	return temp;
 }
-
-
-
-
-
 
 int handleGameInput(){
 	while(1){
@@ -354,6 +346,11 @@ int handleGameInput(){
 				moveDepth=0;
 				std::pair<int,int> bestMove = checkForMax(game,player);
 				coordinate.first=bestMove.first;coordinate.second=bestMove.second;
+			}
+			if(AIlevel=="HARD"){
+				HardAI hAI(game, player);
+				coordinate = hAI.findMax();
+				cout<<"MaxFound:"<<coordinate.first<<","<<coordinate.second<<endl;
 			}
 		}
 		//Check if the game has ended 

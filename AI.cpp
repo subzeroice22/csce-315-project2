@@ -79,12 +79,17 @@ UtilityValue MinValue(State S, Square player, int CurrDepth, int MaxDepth){
 
 
 class HardAI{
-	Reversi* stateP;
+	Reversi stateP;
 	Square player; 
 	
-	HardAI(Reversi* State, Square Player){
+	HardAI(Reversi State, Square Player){
 		player = Player
 		stateP = State;
+	}
+	
+	Action findMax(){
+	
+	
 	}
 
 };
