@@ -64,16 +64,16 @@ struct Reversi
   const int Count(const Square player) const; 
 
   ~Reversi(){
-  /*
-    while(!boardHistory.empty()){
+  
+   /* while(!boardHistory.empty()){
         delete boardHistory.top();
 		boardHistory.pop();
     }
     while(!boardRedos.empty()){
         delete boardRedos.top();
 		boardRedos.pop();
-    }
-	*/
+    }*/
+	
   }
 	const bool DoUndo();
 	const bool DoRedo();

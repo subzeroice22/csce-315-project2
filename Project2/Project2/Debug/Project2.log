@@ -1,31 +1,29 @@
-﻿Build started 6/20/2012 2:58:59 PM.
-     1>Project "C:\Users\curtis\Desktop\CSCE315Project2\Project2\Project2\Project2.vcxproj" on node 2 (rebuild target(s)).
-     1>_PrepareForClean:
-         Deleting file "Debug\Project2.lastbuildstate".
-       InitializeBuildStatus:
+﻿Build started 6/20/2012 4:47:06 PM.
+     1>Project "H:\CSCE315Project2\Project2\Project2\Project2.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
          Touching "Debug\Project2.unsuccessfulbuild".
        ClCompile:
-         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\UnitReversi.cpp ..\..\UnitReversiMain.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\UnitReversiMain.cpp
          UnitReversiMain.cpp
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(97): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(222): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(288): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(285): warning C4101: 'nextPlayer' : unreferenced local variable
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(307): warning C4018: '<' : signed/unsigned mismatch
-         UnitReversi.cpp
-         Generating Code...
-     1>c:\users\curtis\desktop\csce315project2\unitreversimain.cpp(443): warning C4715: 'api' : not all control paths return a value
+     1>h:\csce315project2\unitreversimain.cpp(100): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(225): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(231): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>h:\csce315project2\unitreversimain.cpp(292): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(289): warning C4101: 'nextPlayer' : unreferenced local variable
+     1>h:\csce315project2\unitreversimain.cpp(311): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(470): warning C4715: 'api' : not all control paths return a value
        Link:
-         d:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\curtis\Desktop\CSCE315Project2\Project2\Debug\Project2.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Project2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\curtis\Desktop\CSCE315Project2\Project2\Debug\Project2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\curtis\Desktop\CSCE315Project2\Project2\Debug\Project2.lib" /MACHINE:X86 Debug\UnitReversi.obj
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\CSCE315Project2\Project2\Debug\Project2.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Project2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\CSCE315Project2\Project2\Debug\Project2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\CSCE315Project2\Project2\Debug\Project2.lib" /MACHINE:X86 Debug\UnitReversi.obj
          Debug\UnitReversiMain.obj
-         Project2.vcxproj -> C:\Users\curtis\Desktop\CSCE315Project2\Project2\Debug\Project2.exe
+         LINK : H:\CSCE315Project2\Project2\Debug\Project2.exe not found or not built by the last incremental link; performing full link
+         Project2.vcxproj -> H:\CSCE315Project2\Project2\Debug\Project2.exe
        Manifest:
-         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"C:\Users\curtis\Desktop\CSCE315Project2\Project2\Debug\Project2.exe;#1" /manifest Debug\Project2.exe.intermediate.manifest
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"H:\CSCE315Project2\Project2\Debug\Project2.exe;#1" /manifest Debug\Project2.exe.intermediate.manifest
        FinalizeBuildStatus:
          Deleting file "Debug\Project2.unsuccessfulbuild".
          Touching "Debug\Project2.lastbuildstate".
-     1>Done Building Project "C:\Users\curtis\Desktop\CSCE315Project2\Project2\Project2\Project2.vcxproj" (rebuild target(s)).
+     1>Done Building Project "H:\CSCE315Project2\Project2\Project2\Project2.vcxproj" (build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:07.22
+Time Elapsed 00:00:04.70

@@ -13,10 +13,13 @@
 #include <iterator> 
 #include <memory> 
 #include <sstream> 
+#include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
 //global variables - created to prepare for port to Java
+
 int boardSize=8,randomMove,isHuman,moveDepth;
 bool displayOn=true;
 std::string AIlevel = "OFF";
@@ -225,6 +228,7 @@ void showPossibleMoves(){
 }
 
 void moveRandomly(){
+	srand ( time(NULL) );
 	Reversi tempValid(boardSize);
 	tempValid.SetBoard(game.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(player);
@@ -286,13 +290,13 @@ int checkForMin(Reversi tempGame, Square forcastPlayer){
 	tempValid.SetBoard(tempGame.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
 	for(int possibleOpponentMove=0;possibleOpponentMove<vals.size();possibleOpponentMove++){
-		Reversi tempValid(boardSize);
-		tempValid.SetBoard(tempGame.GetBoard());
-	//	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
-		tempValid.DoMove(vals[possibleOpponentMove].first,vals[possibleOpponentMove].second, forcastPlayer);
-		std::cout<<tempValid<<possibleOpponentMove<<"\n";
-		if(tempValid.Count(forcastPlayer)<count){
-			count=tempValid.Count(forcastPlayer);
+		Reversi tempValida(boardSize);
+		tempValida.SetBoard(tempGame.GetBoard());
+
+		tempValida.DoMove(vals[possibleOpponentMove].first,vals[possibleOpponentMove].second, forcastPlayer);
+//		std::cout<<tempValida<<possibleOpponentMove<<"\n";
+		if(tempValida.Count(forcastPlayer)<count){
+			count=tempValida.Count(forcastPlayer);
 			minPossibleMove=possibleOpponentMove;
 		}
 	}
@@ -305,14 +309,14 @@ std::pair<int,int> checkForMax(Reversi tempGame, Square forcastPlayer){
 	tempValid.SetBoard(tempGame.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){														
-		Reversi tempValid(boardSize);
-		tempValid.SetBoard(tempGame.GetBoard());
-//		std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(forcastPlayer);
+		Reversi tempValidb(boardSize);
+		tempValidb.SetBoard(tempGame.GetBoard());
 
-		tempValid.DoMove(vals[possibleMove].first, vals[possibleMove].second, forcastPlayer);
-		std::cout<<tempValid<<possibleMove<<"\n";
+
+		tempValidb.DoMove(vals[possibleMove].first, vals[possibleMove].second, forcastPlayer);
+//		std::cout<<tempValidb<<possibleMove<<"\n";
 		nextPlayer = (forcastPlayer == player1 ? player2 : player1);
-		countMin=checkForMin(tempValid,nextPlayer);
+		countMin=checkForMin(tempValidb,nextPlayer);
 		if(countMin>countMax){
 			countMax=countMin;
 			maxPossibleMove=possibleMove;
@@ -352,7 +356,30 @@ int handleGameInput(){
 				coordinate.first=bestMove.first;coordinate.second=bestMove.second;
 			}
 		}
-		else {
+		//Check if the game has ended 
+		if (game.Count(empty) == 0) 
+		{ 
+		  //No empty squares 
+		  const int n1 = game.Count(player1); 
+		  const int n2 = game.Count(player2); 
+		  std::cout << "The game has ended." << std::endl 
+			<< "Player 1 conquered " << n1 << " squares." << std::endl 
+			<< "Player 2 conquered " << n2 << " squares." << std::endl 
+			<< "The winner is player " << (n1 > n2 ? "1" : "2") << std::endl 
+			<< "Congratulations!" << std::endl 
+			<< std::endl;
+		  return 1;
+		} 
+
+		//Check if other player can actually do a move 
+		if (game.GetValidMoves(player).empty()==true) 
+		{ //if otherPlayer cannot move,
+		  std::cout << "Too bad! Player " << player << " is unabled to do a valid move!"; 
+		  player = (player == player1 ? player2 : player1); 
+		  std::cout << "\nThe next turn again goes to player " << player << "!" << std::endl; 
+		  continue; 
+		} 
+		if(AIlevel!="OFF"&&player!=AIPlayer) {
 			const std::string input = GetInput();
 			const bool isValidCoordinate = IsCoordinate(input, coordinate); 
 			if (isValidCoordinate == false) 
@@ -399,7 +426,7 @@ int handleGameInput(){
 		//Actually do the move 
 		game.DoMove(coordinate.first, coordinate.second, player); 
 
-		//Check if the game has ended 
+/*		//Check if the game has ended 
 		if (game.Count(empty) == 0) 
 		{ 
 		  //No empty squares 
@@ -421,7 +448,7 @@ int handleGameInput(){
 		  //player = (player == player1 ? player2 : player1); 
 		  std::cout << "\nThe next turn again goes to player " << player << "!" << std::endl; 
 		  continue; 
-		} 
+		} */
 		
 		player = (player == player1 ? player2 : player1); 
 		//foreach pair m in getValidMoves; setSquare(m , validMove);
