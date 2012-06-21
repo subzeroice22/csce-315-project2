@@ -328,7 +328,7 @@ void moveRandomly(){
 	coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
 }
 
-int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
+int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 	
 	int endDepthScore=-99999,minCount=64,minPossibleMove=0,maxPossibleMove=0;
 	Square nextPlayer;
@@ -345,12 +345,11 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 		childBoard.DoMove(vals[possibleMove].first,vals[possibleMove].second,forecastPlayer);//add this move to its board
 		if(depth<maxDepth){
 			nextPlayer = (forecastPlayer == player1 ? player2 : player1);
-			maxCount=maxCount+checkForWeight(childBoard,nextPlayer,depth+1);
+			maxCount=maxCount+checkForWeightZ(childBoard,nextPlayer,depth+1);
 		}
 		else{
 			return childBoard.Count(forecastPlayer);
 		}
-
 		if	(childBoard.Count(empty) == 0||//No more empty squares or niether player has a move, end game 
 			((childBoard.GetValidMoves(player1).empty()==true)&&
 			(childBoard.GetValidMoves(player2).empty()==true))){ 
@@ -403,15 +402,13 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 				(vals[possibleMove].first==7&&vals[possibleMove].second==0))
 					maxCount=maxCount-5000;
 		}
-
-
 		if(maxCount>endDepthScore)
 			endDepthScore=maxCount;
 	}
 	return endDepthScore;
 }
 
-std::pair<int,int> findBestMove(Square forecastPlayer){
+std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
 	int maxCountForAll=-99999,maxCountAtDepth=-99999,maxPossibleMove=0;
 	Square nextPlayer;
 	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);//possible moves for current player
@@ -442,7 +439,7 @@ std::pair<int,int> findBestMove(Square forecastPlayer){
 		
 		
 		nextPlayer = (forecastPlayer == player1 ? player2 : player1);//figure out who is the next player
-		maxCountAtDepth=primaryWeight+checkForWeight(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeight())
+		maxCountAtDepth=primaryWeight+checkForWeightZ(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeightZ())
 		if(maxCountAtDepth>maxCountForAll){	//if this possible Move's maximum outcome is bigger
 			maxCountForAll=maxCountAtDepth;	//keep it as the new maximum overall
 			maxPossibleMove=possibleMove;	//and remember which move that maximum belongs to
@@ -474,7 +471,7 @@ int handleGameInput(){
                     <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n"
                     <<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
                     <<"\nCongratulations!\n\n";
-             return 0;
+             return 1;
         }
 
         //Check if Current Player can actually make a move 
@@ -494,7 +491,7 @@ int handleGameInput(){
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
                     maxDepth=2;
-					std::pair<int,int> bestMove = findBestMove(CurrentPlayer);
+					std::pair<int,int> bestMove = findBestMove(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
@@ -570,18 +567,23 @@ int handleGameInput(){
         CurrentPlayer=GetOtherPlayer(CurrentPlayer); 
         if(displayOn){std::cout<<"-------------------\n\n";}
     }
-    return 0;
+    return 1;
 }
 //Handles user input and display of data 
 int api(std::string commandLine){
-	for(int i=0;i<100;i++)std::cout<<"\n";
-	std::cout<< "WELCOME\n";
-	if(!handlePregameInput()){return 0;}
+	while(1){
+		for(int i=0;i<100;i++)std::cout<<"\n";
+		std::cout<< "WELCOME\n";
+		if(!handlePregameInput()){return 0;}
 	
-	//Player"<<int(player)<<"("<<player<<") is 
-	std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
-	std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
-	if(!handleGameInput()){return 0;}
+		std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
+		std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
+		if(!handleGameInput())
+			return 0;
+		std::cout << "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.";
+		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
+	}
+	return 0;
 }
 
 int main() {
