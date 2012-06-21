@@ -5,8 +5,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-#include "gameStart.h"
-
+//#include "gameStart.h"
+#include "UnitReversiMain.h"
 
 using namespace std;
 
@@ -23,19 +23,34 @@ int main() {
 
 	//Create server socket
 	sock = socket(AF_INET, SOCK_STREAM, 0);
+	
+	if(sock < 0) {
+		perror("socket failed");
+		exit(1);
+	}	
 
 	//bzero((char*) &server_address, sizeof(server_address));
 	memset(&server_address, 0, sizeof(server_address));
 	server_portno = 5000;
 	server_address.sin_family = AF_INET;
-	server_address.sin_addr.s_addr = INADDR_ANY;
+	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_address.sin_port = htons(server_portno);
+	
+	//Some magic code to stop unreliable connecting
+	int optval=1;
+    setsockopt(sock,SOL_SOCKET,SO_REUSEADDR, &optval, sizeof optval);
 
 	//Bind host address
-	bind(sock, (struct sockaddr *) &server_address, sizeof(server_address));
-
+	if(bind(sock, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
+		perror("bind failed");
+		exit(1);
+	}
+	
 	//Listen for clients (1)
-	listen(sock, 1);
+	if(listen(sock, 5) < 0) {
+		perror("listen failed");
+		exit(1);
+	}
 	client_length = sizeof(client_address);
 
 	cout << "Server socket:\t" << sock << '\n';
@@ -51,6 +66,9 @@ int main() {
 	
 	gameStart reversi;
 	reversi.api("START", client_sock);
+	
+	//close the client's connection
+	close(client_sock);
 	
 	return 0;
 	
