@@ -63,18 +63,7 @@ struct Reversi
   const int GetSize() const; 
   const int Count(const Square player) const; 
 
- // ~Reversi(){
-  
-   /* while(!boardHistory.empty()){
-        delete boardHistory.top();
-		boardHistory.pop();
-    }
-    while(!boardRedos.empty()){
-        delete boardRedos.top();
-		boardRedos.pop();
-    }*/
-	
- // }
+
 	const bool DoUndo();
 	const bool DoRedo();
 	void SetBoard(std::vector<std::vector<Square> > newBoard); 
