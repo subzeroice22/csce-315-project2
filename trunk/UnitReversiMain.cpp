@@ -220,7 +220,7 @@ int handlePregameInput(){
 			AIlevelP2="EASY";
 			std::cout<<"HARD V EASY\n";
 		}
-		if(input=="BLACK"){
+		else if(input=="BLACK"){
 			AIlevelP2=AIlevelP1;
 		    AIlevelP1="OFF";
 			std::cout<<"BLACK\n";
