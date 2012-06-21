@@ -333,9 +333,9 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 	int endDepthScore=-99999,minCount=64,minPossibleMove=0,maxPossibleMove=0;
 	Square nextPlayer;
 	if(forecastPlayer!=CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
-		return 10000;
+		return 1000;
 	else if(forecastPlayer==CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
-		return -10000;
+		return -1000;
 	std::vector< std::pair<int,int> >vals=parentBoard.GetValidMoves(forecastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){
 		int maxCount=0;
@@ -359,26 +359,24 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 				else
 					opponent=player1;
 				if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
-					maxCount=maxCount+10000;
+					maxCount=maxCount+100;
 				else
-					maxCount=maxCount-10000;
-		}else if(forecastPlayer!=CurrentPlayer&&childBoard.GetValidMoves(forecastPlayer).empty()==true){
-			maxCount=maxCount+10000;
+					maxCount=maxCount-100;
 		}else if(forecastPlayer==CurrentPlayer){
 			if((vals[possibleMove].first==1&&
 				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7))||
 				(vals[possibleMove].first==6&&
 				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7)))
-					maxCount=maxCount-1000;
+					maxCount=maxCount-100;
 			if((vals[possibleMove].second==1&&
 				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7))||
 				(vals[possibleMove].second==6&&
 				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7)))
-					maxCount=maxCount-1000;
+					maxCount=maxCount-100;
 			if(vals[possibleMove].first==0||vals[possibleMove].first==7)
-				maxCount=maxCount+1000;
+				maxCount=maxCount+100;
 			if(vals[possibleMove].second==0||vals[possibleMove].second==7)
-				maxCount=maxCount+1000;
+				maxCount=maxCount+100;
 			if((vals[possibleMove].first==0&&vals[possibleMove].second==0)||
 				(vals[possibleMove].first==7&&vals[possibleMove].second==7)||
 				(vals[possibleMove].first==0&&vals[possibleMove].second==7)||
@@ -396,16 +394,14 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7)))
 					maxCount=maxCount+100;
 			if(vals[possibleMove].first==0||vals[possibleMove].first==7)
-				maxCount=maxCount-1000;
+				maxCount=maxCount-100;
 			if(vals[possibleMove].second==0||vals[possibleMove].second==7)
-				maxCount=maxCount-1000;
+				maxCount=maxCount-100;
 			if((vals[possibleMove].first==0&&vals[possibleMove].second==0)||
 				(vals[possibleMove].first==7&&vals[possibleMove].second==7)||
 				(vals[possibleMove].first==0&&vals[possibleMove].second==7)||
 				(vals[possibleMove].first==7&&vals[possibleMove].second==0))
 					maxCount=maxCount-5000;
-			if(childBoard.GetValidMoves(forecastPlayer).empty()==true)
-				maxCount=maxCount+1000;
 		}
 
 
@@ -446,7 +442,7 @@ std::pair<int,int> findBestMove(Square forecastPlayer){
 		
 		
 		nextPlayer = (forecastPlayer == player1 ? player2 : player1);//figure out who is the next player
-		maxCountAtDepth=primaryWeight+checkForWeight(boardForAPrimaryMove,nextPlayer,0);//the maximum outcome from the set Depth (checkForWeight())
+		maxCountAtDepth=primaryWeight+checkForWeight(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeight())
 		if(maxCountAtDepth>maxCountForAll){	//if this possible Move's maximum outcome is bigger
 			maxCountForAll=maxCountAtDepth;	//keep it as the new maximum overall
 			maxPossibleMove=possibleMove;	//and remember which move that maximum belongs to

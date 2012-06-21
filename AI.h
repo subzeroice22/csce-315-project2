@@ -59,6 +59,7 @@ State Result(const State S, Action A, Square player){
     State ret = S;
     ret.DoMove(A.first,A.second,player);
     return ret;
+	return ret;
 }
 
 UtilityValue Utility(const State S, Square player){
