@@ -19,7 +19,7 @@
 #include <limits>
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
-//#include "AI.h"
+#include "AI.h"
 //global variables - created to prepare for port to Java
 
 int boardSize=8,randomMove,isHuman,maxDepth;
@@ -207,7 +207,7 @@ int handlePregameInput(){
 		}
 		else if(input=="TEST_HARD"){
 			AIlevelP1="HARD";
-			AIleveP2="HARD";
+			AIlevelP2="HARD";
 			std::cout<<"HARD V HARD\n";
 		}
 		else if(input=="TEST_MEDIUM"){
@@ -498,7 +498,7 @@ int handleGameInput(){
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
                     maxDepth=2;
-					std::pair<int,int> bestMove = findBestMove(player);
+					std::pair<int,int> bestMove = findBestMove(CurrentPlayer);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
