@@ -207,7 +207,7 @@ int handlePregameInput(){
 		}
 		else if(input=="TEST_HARD"){
 			AIlevelP1="HARD";
-			AIleveP2="HARD"
+			AIleveP2="HARD";
 			std::cout<<"HARD V HARD\n";
 		}
 		else if(input=="TEST_MEDIUM"){
@@ -332,9 +332,9 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 	
 	int endDepthScore=-99999,minCount=64,minPossibleMove=0,maxPossibleMove=0;
 	Square nextPlayer;
-	if(forecastPlayer!=player&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
+	if(forecastPlayer!=CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
 		return 10000;
-	else if(forecastPlayer==player&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
+	else if(forecastPlayer==CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
 		return -10000;
 	std::vector< std::pair<int,int> >vals=parentBoard.GetValidMoves(forecastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){
@@ -354,17 +354,17 @@ int checkForWeight(Reversi parentBoard, Square forecastPlayer,int depth){
 		if	(childBoard.Count(empty) == 0||//No more empty squares or niether player has a move, end game 
 			((childBoard.GetValidMoves(player1).empty()==true)&&
 			(childBoard.GetValidMoves(player2).empty()==true))){ 
-				if(player==player1)
+				if(CurrentPlayer==player1)
 					opponent=player2;
 				else
 					opponent=player1;
-				if(childBoard.Count(player)>childBoard.Count(opponent))
+				if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
 					maxCount=maxCount+10000;
 				else
 					maxCount=maxCount-10000;
-		}else if(forecastPlayer!=player&&childBoard.GetValidMoves(forecastPlayer).empty()==true){
+		}else if(forecastPlayer!=CurrentPlayer&&childBoard.GetValidMoves(forecastPlayer).empty()==true){
 			maxCount=maxCount+10000;
-		}else if(forecastPlayer==player){
+		}else if(forecastPlayer==CurrentPlayer){
 			if((vals[possibleMove].first==1&&
 				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7))||
 				(vals[possibleMove].first==6&&
@@ -497,15 +497,15 @@ int handleGameInput(){
                     moveRandomly();
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-                    moveDepth=0;
-                    std::pair<int,int> bestMove = checkForMax(game,CurrentPlayer);
-                    coordinate.first=bestMove.first;coordinate.second=bestMove.second;
+                    maxDepth=2;
+					std::pair<int,int> bestMove = findBestMove(player);
+					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
                     HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
                     coordinate = hAI.findMax();
                 }
-                std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<endl;
+                std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
             }
             else if( !(PlayerIsAI(CurrentPlayer)) ) {
                 //CurrentPlayer is a Human
@@ -555,7 +555,7 @@ int handleGameInput(){
                 if(isValidCoordinate){
                    //Valid coordinate was entered
                     if(displayOn){
-                        std::cout<<"Human Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<endl;
+                        std::cout<<"Human Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
                     }
                 }
             }//End Human Input
