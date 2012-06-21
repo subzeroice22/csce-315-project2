@@ -423,16 +423,13 @@ int handleGameInput(){
 				coordinate.first=bestMove.first;coordinate.second=bestMove.second;
 			}
 			if(AIlevel=="HARD"){
-				maxDepth=3;
-				std::pair<int,int> bestMove = findBestMove(player);
-				coordinate.first=bestMove.first;coordinate.second=bestMove.second;
-				//HardAI hAI(game, player);
-				//coordinate = hAI.findMax();
-				//cout<<"MaxFound:"<<coordinate.first<<","<<coordinate.second<<endl;
+				HardAI hAI(game, player);
+				coordinate = hAI.findMax();
+				cout<<"MaxFound:"<<coordinate.first<<","<<coordinate.second<<endl;
 			}
 		}
 		if(test==true&&player==player1){
-			maxDepth=3;
+			maxDepth=2;
 			std::pair<int,int> bestMove = findBestMove(player);
 			coordinate.first=bestMove.first;coordinate.second=bestMove.second;
 		}
