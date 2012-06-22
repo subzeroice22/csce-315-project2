@@ -5,7 +5,9 @@
 	Richel Bilderbeek 
 	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
 ---------------------------------------------------------------------------*/
-//#include <vector> 
+//#include <sys/types.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
 #include <numeric> 
 #include <algorithm> 
 #include <iostream> 
@@ -15,23 +17,27 @@
 #include <sstream> 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <limits>
+#include <time.h>//for seeding srand()
+#include <limits>//maxlimit used in cin.ignore.get pause
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
+//#include <WinSock2.h>
 #include "AI.h"
 //global variables
-
 int boardSize=8,randomMove,isHuman,maxDepth;
-bool displayOn=true,test=false;
-
-
+bool displayOn=true,test=false,server=false;
 //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
 std::string AIlevelP1 = "OFF"; //Defaults P2 'OFF' i.e. P2==Human.
 std::string AIlevelP2 = defaultAISetting; ////Defaults P2 to EASY AI.   EASY, MEDIUM, HARD, HARDdebg, ... { P1EASY, P2HARD, P2HARD3,...}(commands. ie to make player2 a hard level AI that looks ahead 3 plys)
+std::string NullString="NULL";
+std::pair<int,int> coordinate,bestMove;
+Reversi newBoard(boardSize);
+Reversi game(boardSize);
 
+
+//used to determine if the passed player is one of the AIs
 bool PlayerIsAI(Square Player){
     if(Player==player1){return (AIlevelP1!="OFF"); }
     else if(Player==player2){return (AIlevelP2!="OFF");}
@@ -39,20 +45,15 @@ bool PlayerIsAI(Square Player){
         std::cerr<<"Error: Player passed into --bool isPlayerAI(Square Player)-- must be either player1 or player2.\n";
         return false;
     }
-} bool isPlayerAI(Square Player){return PlayerIsAI(Player);}
-
-std::string NullString="NULL";
+} 
+bool isPlayerAI(Square Player){return PlayerIsAI(Player);}
+//returns the name of the AI as a string, EASY, MEDIUM, HARD
 std::string& AIlevel(Square Player){ // Getter/Setter  i.e. void MakeP1Human(){ AIlevel(player1)="OFF";}
     if(!isPlayerAI(Player)){std::cerr<<"Error: Player passed into --std::string& AIlevel(Square Player)-- is not AI.\n"; return NullString;}
     if(Player==player1){return AIlevelP1;}
     else if(Player==player2){return AIlevelP2;}
     else{ std::cerr<<"Error: Player passed into --std::string& AIlevel(Square Player)-- must be either player1 or player2.\n"; return NullString;}
 }
-
-Reversi newBoard(boardSize);
-Reversi game(boardSize);//or you could prompt for the board size with Reversi r(AskUserForBoardSize());
-std::pair<int,int> coordinate,bestMove;
-
 //<< override for Reversi object squares
 std::ostream& operator<<(std::ostream& os, const Square s) { 
     switch(s){
@@ -115,17 +116,35 @@ const bool IsInt(const std::string& s, int& rInt)
   } 
   return true; 
 } 
-//Handles all input and drops the newline char
-const std::string GetInput(){
-	char c;
+
+
+//Handles all input and drops the newline char.  Either recv or getlines.
+const std::string GetInput(int client){
+	char input[30],c;
 	std::string s; 
-	std::getline(std::cin,s,'\n'); 
+	if(server==true){
+		//recv(client, input, sizeof(input),0);
+		s=input;
+	}else{
+		std::getline(std::cin,s,'\n'); 
+	}
 	for(int i=0;i<s.size();i++){
 		c=s[i];
 		s[i]=toupper(c);
 	}
 	return s; 
 }
+//Handles all output.  Takes a string and either cout or sends
+void PrintOut(std::string inString,int client){
+	char charToSend[30];
+	strcpy(charToSend,inString.c_str());
+	if(server==true){
+		//send(client,charToSend+'\n',sizeof(charToSend+'\n'),0);
+	}else {
+		std::cout<<inString;
+	}
+}
+
 //Breaks up the coordinate input for an x and y value
 const std::vector<std::string> SeperateString(std::string input, const char seperator){
   assert(input.empty()==false); 
@@ -160,11 +179,11 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
     return true;
 } 
 //Optional menu option allowing for board sizes between 4X4 and 16X16
-const int AskUserForBoardSize(){
+const int AskUserForBoardSize(int client){
   //Get the board's size 
   while (1){
     std::cout << "Please enter the size of the reversi board" << std::endl; 
-    const std::string input = GetInput(); 
+    const std::string input = GetInput(client); 
     int size = -1; 
     if ( IsInt(input,size) == false) 
     { 
@@ -185,9 +204,9 @@ const int AskUserForBoardSize(){
   } 
 }
 //takes input from the user that will set definations for the game settings
-int handlePregameInput(){
+int handlePregameInput(int client){
 	while(1){
-		const std::string input = GetInput();
+		const std::string input = GetInput(client);
 		if(input=="EXIT"){
 			return 0;
 		}
@@ -512,7 +531,7 @@ std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
 
 }
 //receives all input during the execution of the game
-int handleGameInput(){
+int handleGameInput(int client){
     while(1){
         if(displayOn){
             std::cout<<"\n-------------------\n";
@@ -584,7 +603,7 @@ int handleGameInput(){
             else if( !(PlayerIsAI(CurrentPlayer)) ) {
                 //CurrentPlayer is a Human
                 std::cout<<"::";
-                const std::string input = GetInput();
+                const std::string input = GetInput(client);
                 const bool isValidCoordinate = IsCoordinate(input, coordinate); 
                 if (isValidCoordinate == false){
                     //Input was not a Coordinate
@@ -651,15 +670,16 @@ int handleGameInput(){
     return 1;
 }
 //Handles user input and display of data 
-int api(std::string commandLine){
-	while(1){
-		for(int i=0;i<50;i++)std::cout<<"\n";
+int api(std::string commandLine,int client){
+		for(int i=0;i<40;i++)std::cout<<"\n";
 		std::cout<< "WELCOME\n";
-		if(!handlePregameInput()){return 0;}
+	while(1){
+
+		if(!handlePregameInput(client)){return 0;}
 	
 		std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
 		std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
-		if(!handleGameInput())
+		if(!handleGameInput(client))
 			return 0;
 		std::cout << "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.";
 		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -669,7 +689,8 @@ int api(std::string commandLine){
 }
 
 int main() {
-	api("START");
+	int client=0;//temp value until implemented with server
+	api("START",client);
 	return 0;
 }
 
