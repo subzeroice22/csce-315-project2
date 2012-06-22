@@ -215,6 +215,11 @@ int handlePregameInput(){
 			AIlevelP2="MEDIUM";
 			std::cout<<"HARD V MEDIUM\n";
 		}
+		else if(input=="MEDIUM"){
+			AIlevelP1="HARD";
+			AIlevelP2="MEDIUM";
+			std::cout<<"HARD V MEDIUM\n";
+		}
 		else if(input=="TEST_EASY"){
 			AIlevelP1="HARD";
 			AIlevelP2="EASY";
@@ -328,14 +333,88 @@ void moveRandomly(){
 	coordinate.first=vals[randomMove].first;coordinate.second=vals[randomMove].second;
 }
 
+int heuristicWeight(Reversi childBoard, int x, int y, Square moveOwner, int depth){
+	int cummulative=0;
+	//got a corner
+	if(	(x==0&&y==0)||//top left
+		(x==boardSize-1&&y==boardSize-1)||//bottom right
+		(x==0&&y==boardSize-1)||//bottom left
+		(x==boardSize-1&&y==0)){ //top right
+		if(moveOwner==CurrentPlayer)
+			return  5000;//player wants this bad
+		else
+			return -5000;//player definately doesn't want oppoent to have
+	}
+	//edge next to empty corner
+	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==empty)||
+		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==empty)||
+		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==empty)||
+		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==empty)){
+			if(moveOwner==CurrentPlayer)
+				return -1500;
+			else
+				return 1500;
+	}
+	//got an edge
+	if( x==0||//left edge
+		x==boardSize-1||//right edge
+		y==0||//top edge
+		y==boardSize-1){//bottom edge
+		if(moveOwner==CurrentPlayer)
+			return 1500;
+		else
+			return -1500;
+	}
+	//avoid these
+	if( x==1||x==boardSize-2)
+		if(moveOwner==CurrentPlayer)
+			cummulative+= -1000;//in this case player doesn't want this move
+		else
+			cummulative+= 1000;//player would like his opponent to make this move
+	if( y==1||y==boardSize-2)
+		if(moveOwner==CurrentPlayer)
+			cummulative+= -1000;//in this case player doesn't want this move
+		else
+			cummulative+= 1000;//player would like his opponent to make this move
+
+	return cummulative;
+}
+
+int endGameEvaluator(Reversi childBoard){
+	Square opponent;
+	if	(childBoard.Count(empty) == 0||//No more empty squares or niether player has a move, end game 
+		((childBoard.GetValidMoves(player1).empty()==true)&&
+		(childBoard.GetValidMoves(player2).empty()==true))){ 
+			if(CurrentPlayer==player1)
+				opponent=player2;
+			else
+				opponent=player1;
+			if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
+				return 10000;
+			else
+				return -10000;
+	}
+	return 0;
+}
+
+int numOfAvailableMovesEvaluator(Reversi childBoard,Square forecastPlayer){
+	//evaluating a board that forecastPlayer has just played on
+	Square nextPlayer = (forecastPlayer == player1 ? player2 : player1);
+	if(childBoard.GetValidMoves(nextPlayer).empty()){
+		if(CurrentPlayer==forecastPlayer)
+			return 10000;
+		else
+			return -10000;
+	}
+	else
+		return childBoard.GetValidMoves(nextPlayer).size();
+	return 0;
+}
+
 int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 	
 	int endDepthScore=-99999,minCount=64,minPossibleMove=0,maxPossibleMove=0;
 	Square nextPlayer;
-	if(forecastPlayer!=CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
-		return 1000;
-	else if(forecastPlayer==CurrentPlayer&&parentBoard.GetValidMoves(forecastPlayer).empty()==true)
-		return -1000;
 	std::vector< std::pair<int,int> >vals=parentBoard.GetValidMoves(forecastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){
 		int maxCount=0;
@@ -343,65 +422,18 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		Reversi childBoard(boardSize);				//making one childBoard for each 
 		childBoard.SetBoard(parentBoard.GetBoard());//possible Move from the parentBoard
 		childBoard.DoMove(vals[possibleMove].first,vals[possibleMove].second,forecastPlayer);//add this move to its board
-		if(depth<maxDepth){
-			nextPlayer = (forecastPlayer == player1 ? player2 : player1);
-			maxCount=maxCount+checkForWeightZ(childBoard,nextPlayer,depth+1);
+		//my attempt at alpha-beta pruning: 
+		if(	depth<maxDepth&&//if not at our maximum allowed recursion, the state isn't at the end of the game
+			endGameEvaluator(childBoard)>=0&&//and this move is not the opponent taking a cornder... then keep going.
+			heuristicWeight(childBoard,vals[possibleMove].first,vals[possibleMove].second,forecastPlayer, depth)!=-10000&&
+			numOfAvailableMovesEvaluator(childBoard,forecastPlayer)!=-10000){
+				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
+				maxCount=maxCount+checkForWeightZ(childBoard,nextPlayer,depth+1);
 		}
 		else{
-			return childBoard.Count(forecastPlayer);
+			return childBoard.Count(CurrentPlayer)*100+endGameEvaluator(childBoard);
 		}
-		if	(childBoard.Count(empty) == 0||//No more empty squares or niether player has a move, end game 
-			((childBoard.GetValidMoves(player1).empty()==true)&&
-			(childBoard.GetValidMoves(player2).empty()==true))){ 
-				if(CurrentPlayer==player1)
-					opponent=player2;
-				else
-					opponent=player1;
-				if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
-					maxCount=maxCount+100;
-				else
-					maxCount=maxCount-100;
-		}else if(forecastPlayer==CurrentPlayer){
-			if((vals[possibleMove].first==1&&
-				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7))||
-				(vals[possibleMove].first==6&&
-				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7)))
-					maxCount=maxCount-100;
-			if((vals[possibleMove].second==1&&
-				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7))||
-				(vals[possibleMove].second==6&&
-				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7)))
-					maxCount=maxCount-100;
-			if(vals[possibleMove].first==0||vals[possibleMove].first==7)
-				maxCount=maxCount+100;
-			if(vals[possibleMove].second==0||vals[possibleMove].second==7)
-				maxCount=maxCount+100;
-			if((vals[possibleMove].first==0&&vals[possibleMove].second==0)||
-				(vals[possibleMove].first==7&&vals[possibleMove].second==7)||
-				(vals[possibleMove].first==0&&vals[possibleMove].second==7)||
-				(vals[possibleMove].first==7&&vals[possibleMove].second==0))
-					maxCount=maxCount+5000;
-		}else{
-			if((vals[possibleMove].first==1&&
-				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7))||
-				(vals[possibleMove].first==6&&
-				(vals[possibleMove].second!=0&&vals[possibleMove].second!=7)))
-					maxCount=maxCount+100;
-			if((vals[possibleMove].second==1&&
-				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7))||
-				(vals[possibleMove].second==6&&
-				(vals[possibleMove].first!=0&&vals[possibleMove].first!=7)))
-					maxCount=maxCount+100;
-			if(vals[possibleMove].first==0||vals[possibleMove].first==7)
-				maxCount=maxCount-100;
-			if(vals[possibleMove].second==0||vals[possibleMove].second==7)
-				maxCount=maxCount-100;
-			if((vals[possibleMove].first==0&&vals[possibleMove].second==0)||
-				(vals[possibleMove].first==7&&vals[possibleMove].second==7)||
-				(vals[possibleMove].first==0&&vals[possibleMove].second==7)||
-				(vals[possibleMove].first==7&&vals[possibleMove].second==0))
-					maxCount=maxCount-5000;
-		}
+		maxCount+=heuristicWeight(childBoard,vals[possibleMove].first,vals[possibleMove].second,forecastPlayer, depth);
 		if(maxCount>endDepthScore)
 			endDepthScore=maxCount;
 	}
@@ -411,33 +443,21 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
 	int maxCountForAll=-99999,maxCountAtDepth=-99999,maxPossibleMove=0;
 	Square nextPlayer;
-	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);//possible moves for current player
+	//vals will hold the possible moves for the player we want to forcast at this depth
+	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);
 	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){	
 		int primaryWeight=0;
 		Reversi boardForAPrimaryMove(boardSize);
-		boardForAPrimaryMove.SetBoard(game.GetBoard());//new board (branch to tree) for each possibleMove created each itteration
-		boardForAPrimaryMove.DoMove(vals[possibleMove].first, vals[possibleMove].second, forecastPlayer);//add this possible move to its board
-		if(	(vals[possibleMove].first==1&&
-			(vals[possibleMove].second!=0&&vals[possibleMove].second!=7))||
-			(vals[possibleMove].first==6&&
-			(vals[possibleMove].second!=0&&vals[possibleMove].second!=7)))
-				primaryWeight=primaryWeight-5000;
-		if(	(vals[possibleMove].second==1&&
-			(vals[possibleMove].first!=0&&vals[possibleMove].first!=7))||
-			(vals[possibleMove].second==6&&
-			(vals[possibleMove].first!=0&&vals[possibleMove].first!=7)))
-				primaryWeight=primaryWeight-5000;
-		if(vals[possibleMove].first==0||vals[possibleMove].first==7)
-				primaryWeight=primaryWeight+2000;
-		if(vals[possibleMove].second==0||vals[possibleMove].second==7)
-				primaryWeight=primaryWeight+2000;
-		if(	(vals[possibleMove].first==0&&vals[possibleMove].second==0)||
-			(vals[possibleMove].first==7&&vals[possibleMove].second==7)||
-			(vals[possibleMove].first==0&&vals[possibleMove].second==7)||
-			(vals[possibleMove].first==7&&vals[possibleMove].second==0))
-				primaryWeight=primaryWeight+5000;
-		
-		
+		//new board (branch to tree) for each possibleMove created each itteration
+		boardForAPrimaryMove.SetBoard(game.GetBoard());
+		//add this possible move to its board
+		boardForAPrimaryMove.DoMove(vals[possibleMove].first,
+									vals[possibleMove].second,
+									forecastPlayer);
+		primaryWeight+=heuristicWeight(	boardForAPrimaryMove,
+										vals[possibleMove].first,
+										vals[possibleMove].second,
+										forecastPlayer, depth)*maxDepth;
 		nextPlayer = (forecastPlayer == player1 ? player2 : player1);//figure out who is the next player
 		maxCountAtDepth=primaryWeight+checkForWeightZ(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeightZ())
 		if(maxCountAtDepth>maxCountForAll){	//if this possible Move's maximum outcome is bigger
@@ -473,6 +493,21 @@ int handleGameInput(){
                     <<"\nCongratulations!\n\n";
              return 1;
         }
+		if ((game.GetValidMoves(player1).empty()==true)&&
+			(game.GetValidMoves(player2).empty()==true)){
+			//No available moves for either player 
+            const int n1 = game.Count(player1); 
+            const int n2 = game.Count(player2); 
+            std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
+            std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
+            std::cout<< "The game has ended\n"
+                    <<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
+                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n"
+                    <<"It was a draw!\n";
+             return 1;
+		}
+
+
 
         //Check if Current Player can actually make a move 
         if (game.GetValidMoves(CurrentPlayer).empty()==true){
@@ -490,13 +525,16 @@ int handleGameInput(){
                     moveRandomly();
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-                    maxDepth=2;
+                    maxDepth=3;
 					std::pair<int,int> bestMove = findBestMove(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-                    HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
-                    coordinate = hAI.findMax();
+					maxDepth=3;
+					std::pair<int,int> bestMove = findBestMove(CurrentPlayer,0);
+					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
+                    //HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
+                    //coordinate = hAI.findMax();
                 }
                 std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
             }
@@ -572,7 +610,7 @@ int handleGameInput(){
 //Handles user input and display of data 
 int api(std::string commandLine){
 	while(1){
-		for(int i=0;i<100;i++)std::cout<<"\n";
+		for(int i=0;i<50;i++)std::cout<<"\n";
 		std::cout<< "WELCOME\n";
 		if(!handlePregameInput()){return 0;}
 	
@@ -582,6 +620,7 @@ int api(std::string commandLine){
 			return 0;
 		std::cout << "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.";
 		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		game.SetBoard(newBoard.GetBoard());
 	}
 	return 0;
 }
