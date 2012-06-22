@@ -357,8 +357,8 @@ int handlePregameInput(int client){
 			ssAIlevelP1 << AIlevelP1;
 			ssAIlevelP2 << AIlevelP2;
 			
-			message = message + ssAIlevelP1.str() + "-AI, P2:" + ssAIlevelP2.str() + "-AI\n";
-			send(client, message.c_str(), 30, 0);
+			message = message + ssAIlevelP1.str() + "-AI, P2:" + ssAIlevelP2.str() + "-AI\n";			
+			send(client, message.c_str(), 20, 0);
 			
 			// here
 		    displayOn=true;
@@ -378,7 +378,7 @@ int handlePregameInput(int client){
 			ssAIlevelP2 << AIlevelP2;
 			
 			message = message + ssAIlevelP1.str() + "-AI, P2:" + ssAIlevelP2.str() + "-AI\n";
-			send(client, message.c_str(), 30, 0);
+			send(client, message.c_str(), 20, 0);
 			
 			// here
 		    displayOn=true;
@@ -559,14 +559,13 @@ int handleGameInput(int client){
 			ssGameBoard << game;
 			std::string message = "Current Player:" + ssCurrentPlayer.str() + "\n";
 			
-			
 			send(client, "\n-------------------\n", 21, 0);
-			send(client, message.c_str(), 20, 0);
+			send(client, message.c_str(), 18, 0);
 			
 			if(PlayerIsAI(CurrentPlayer)) {
-				send(client, "Waiting on AI\n", 20, 0);				
+				send(client, "Waiting on AI\n", 14, 0);				
 			} else {
-				send(client, "Human's Move\n", 20, 0);
+				send(client, "Human's Move\n", 13, 0);
 			}
 			send(client, ssGameBoard.str().c_str(), 200, 0);
 			// here
@@ -618,7 +617,17 @@ int handleGameInput(int client){
                     coordinate = hAI.findMax();
                 }
                 std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
-				// here
+				
+				ostringstream ssAIlevelCurrentPlayer;
+				ostringstream ssCoordinates;
+				
+				ssAIlevelCurrentPlayer << AIlevel(CurrentPlayer);
+				ssCoordinates << char('A'+coordinate.first)<<coordinate.second+1;
+			
+				std::string message = ssAIlevelCurrentPlayer.str() + "-AI Plays @:" + ssCoordinates.str() + "\n";
+				send(client, message.c_str(), 21, 0);
+				
+				// here!
             }
             else if( !(PlayerIsAI(CurrentPlayer)) ) {
                 //CurrentPlayer is a Human
@@ -685,6 +694,13 @@ int handleGameInput(int client){
                    //Valid coordinate was entered
                     if(displayOn){
                         std::cout<<"Human Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
+						
+						ostringstream ssCoordinates;
+						
+						ssCoordinates << char('A'+coordinate.first)<<coordinate.second+1;
+						std::string message = "Human Plays @:" + ssCoordinates.str() + "\n";
+						send(client, message.c_str(), 17, 0);
+						
 						// here
                     }
                 }
@@ -703,7 +719,10 @@ int handleGameInput(int client){
 
         //Switch Player's turns
         CurrentPlayer=GetOtherPlayer(CurrentPlayer); 
-        if(displayOn){std::cout<<"-------------------\n\n"; /* here */ }
+        if(displayOn){std::cout<<"-------------------\n\n";
+			send(client, "-------------------\n\n", 21, 0);
+
+		/* here */ }
     }
     return 0;
 }
@@ -732,22 +751,22 @@ public:
 		
 		if(PlayerIsAI(player1)) {
 			ssPlayer1 << player1;
-			infoPlayer1 = "Player1: AI	:" + ssPlayer1.str() + ": BLACK\n";
+			infoPlayer1 = "Player1: AI\t:" + ssPlayer1.str() + ": BLACK\n";
 		} else {
 			ssPlayer1 << player1;
-			infoPlayer1 = "Player1: Human	:" + ssPlayer1.str() + ": BLACK\n";
+			infoPlayer1 = "Player1: Human\t:" + ssPlayer1.str() + ": BLACK\n";
 		}
 		
 		if(PlayerIsAI(player2)) {
 			ssPlayer2 << player2;
-			infoPlayer2 = "Player2: AI	:" + ssPlayer2.str() + ": WHITE\n";
+			infoPlayer2 = "Player2: AI\t:" + ssPlayer2.str() + ": WHITE\n";
 		} else {
 			ssPlayer2 << player2;
-			infoPlayer2 = "Player2: Human	:" + ssPlayer2.str() + ": WHITE\n";
+			infoPlayer2 = "Player2: Human\t:" + ssPlayer2.str() + ": WHITE\n";
 		}
 		
-		send(client, infoPlayer1.c_str(), 30, 0);
-		send(client, infoPlayer2.c_str(), 30, 0);
+		send(client, infoPlayer1.c_str(), 24, 0);
+		send(client, infoPlayer2.c_str(), 24, 0);
 		
 		if(!handleGameInput(client)){return 0;}
 	}

@@ -1,0 +1,5 @@
+The makefile will compile the source code (enter make as a command)
+The file to execute is called game (./game)
+Once a session of game is running, have another instance of Putty up
+In the second Putty window, type: telnet unix.cs.tamu.edu 5000
+The first argument is the address, the second is the port number.
