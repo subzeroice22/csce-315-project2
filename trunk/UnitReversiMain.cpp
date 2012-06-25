@@ -25,7 +25,7 @@
 #include "AI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=0;
+int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=6;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -375,35 +375,31 @@ int handleGameInput(int client){
             std::cout<<((PlayerIsAI(CurrentPlayer))?("Waiting on AI"):("Human's Move"))<<"\n";
             std::cout<< game;
         }
-
-        //Check if the game has ended 
-        if (game.Count(empty) == 0){
-            //No empty squares 
-            const int n1 = game.Count(player1); 
-            const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
-            std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
-            std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
-            std::cout<< "The game has ended\n"
-                    <<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
-                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
-			if(n1==n2)
-				PrintOut("It's a Draw!\n",client);
-			else{
-				std::cout<<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
-                    <<"\nCongratulations!\n\n";
-			}
-             return 1;
-        }
-
-
-
         //Check if Current Player can actually make a move 
         if (game.GetValidMoves(CurrentPlayer).empty()==true){
-            //If Current Player cannot move,
-            std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
-            CurrentPlayer=GetOtherPlayer(CurrentPlayer);
-            std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
-            continue;
+			if(game.GetValidMoves(GetOtherPlayer(CurrentPlayer)).empty()==true){
+				//no player has a move available - end game
+				const int n1 = game.Count(player1); 
+				const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
+				std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
+				std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
+				std::cout<< "The game has ended\n"
+						<<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
+						<<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
+				if(n1==n2)
+					PrintOut("It's a Draw!\n",client);
+				else{
+					std::cout<<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
+						<<"\nCongratulations!\n\n";
+				}
+				 return 1;
+			}else{
+				//If Current Player cannot move, but other player can
+				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
+				CurrentPlayer=GetOtherPlayer(CurrentPlayer);
+				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
+				continue;
+			}
         }
         
         {//Input-Gathering Block
@@ -582,9 +578,9 @@ int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int dep
 		(x==0&&y==boardSize-1)||//bottom left
 		(x==boardSize-1&&y==0)){ //top right
 		if(moveOwner==CurrentPlayer)
-			return  25000/(depth+1);//45,19@5000&10k&11k&15k
+			return  10000/(depth+1);//45,19@5000&10k&11k&15k
 		else
-			return -25000/(depth+1);//45,19@-5000&-10k&-11k&-15k
+			return -10000/(depth+1);//45,19@-5000&-10k&-11k&-15k
 	}
 	//edge next to empty corner
 	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==empty)||
@@ -592,27 +588,37 @@ int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int dep
 		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==empty)||
 		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==empty)){
 			if(moveOwner==CurrentPlayer)
-				return -7000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
+				return -5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
 			else
-				return 7000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
+				return 5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
+	}
+	//safe edge next to corner
+	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==moveOwner)||
+		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==moveOwner)||
+		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==moveOwner)||
+		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==moveOwner)){
+			if(moveOwner==CurrentPlayer)
+				return 5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
+			else
+				return 5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
 	}
 	if( ((x==1&&y==1)&&childBoard.GetSquare(0,0)==empty)||
 		((x==1&&y==6)&&childBoard.GetSquare(0,7)==empty)||
 		((x==6&&y==1)&&childBoard.GetSquare(7,0)==empty)||
 		((x==6&&y==6)&&childBoard.GetSquare(7,7)==empty) ){
 			if(moveOwner==CurrentPlayer)
-				return -25000/(depth+1);
+				return -5000/(depth+1);
 			else
-				return 25000/(depth+1);
+				return 5000/(depth+1);
 	}//adding this brought from38,26vsZ to 45,19vsZ
 	if( ((x==2&&y==2)&&childBoard.GetSquare(0,0)==empty)||
 		((x==2&&y==5)&&childBoard.GetSquare(0,7)==empty)||
 		((x==5&&y==2)&&childBoard.GetSquare(7,0)==empty)||
 		((x==5&&y==5)&&childBoard.GetSquare(7,7)==empty) ){
 			if(moveOwner==CurrentPlayer)
-				return 10000/(depth+1);
+				return 2500/(depth+1);
 			else
-				return -10000/(depth+1);
+				return -2500/(depth+1);
 	}//adding this brought from38,26vsZ to 45,19vsZ
 	//got an edge
 	if( x==0||//left edge									//adding(1)
@@ -622,7 +628,7 @@ int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int dep
 		if(moveOwner==CurrentPlayer)
 			return 1500/(depth+1);
 		else
-			return -5000/(depth+1);
+			return -1500/(depth+1);
 	}
 	//avoid these
 	if( x==1||x==boardSize-2){
@@ -653,9 +659,9 @@ int endGameEvaluator(Reversi childBoard){
 			else
 				opponent=player1;
 			if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
-				return 10000;
+				return childBoard.Count(CurrentPlayer)*1000;
 			else
-				return -10000;
+				return childBoard.Count(opponent)*(-1000);
 	}
 	return 0;
 }
@@ -671,11 +677,6 @@ int numOfAvailableMovesEvaluator(Reversi childBoard,Square forecastPlayer){
 		else
 			return -10000;
 	}
-	else
-		if(CurrentPlayer==forecastPlayer)
-			return (-10)*childBoard.GetValidMoves(nextPlayer).size();
-		else
-			return (10)*childBoard.GetValidMoves(nextPlayer).size();
 	return 0;
 
 }
@@ -757,6 +758,8 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 	std::vector<int> weights;	
 //	if(!endGameEvaluator(parentBoard))
 //		return endGameEvaluator(parentBoard);
+	if(endGameEvaluator(parentBoard)!=0)
+			return endGameEvaluator(parentBoard);
 
 	//here we itterate through the moves, creating a private object for each
 	//move that contains some private variables and a private boardState that
@@ -785,13 +788,15 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 		childBoard.DoMove(	vals[possibleMove].first,
 							vals[possibleMove].second,
 							forecastPlayer);
+		if(numOfAvailableMovesEvaluator(childBoard,forecastPlayer)!=0)
+			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
 		if(	depth<maxDepth&&//if not at our maximum allowed recursion
 			heuristicWeightY(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
-							forecastPlayer, depth)!=-25000){//opponent taking a corner 
+							forecastPlayer, depth)!=-10000/(depth+1)){//opponent taking a corner 
 				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
 				forecastedMoveWeight+=checkForWeightY(childBoard,nextPlayer,depth+1);
 
