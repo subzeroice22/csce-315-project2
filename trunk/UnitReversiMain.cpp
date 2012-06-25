@@ -25,7 +25,7 @@
 #include "AI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth;
+int boardSize=8,randomMove,isHuman,maxDepth=2;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -361,7 +361,10 @@ int handlePregameInput(int client){
 }
 
 //forward decleration
-std::pair<int,int> findBestMove(Square forecastPlayer,int depth);
+std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth);
+
+//forward decleration
+std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth);
 
 //receives all input during the execution of the game
 int handleGameInput(int client){
@@ -382,9 +385,13 @@ int handleGameInput(int client){
             std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
             std::cout<< "The game has ended\n"
                     <<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
-                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n"
-                    <<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
+                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
+			if(n1==n2)
+				PrintOut("It's a Draw!",client);
+			else{
+				std::cout<<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
                     <<"\nCongratulations!\n\n";
+			}
              return 1;
         }
 		if ((game.GetValidMoves(player1).empty()==true)&&
@@ -419,12 +426,13 @@ int handleGameInput(int client){
                     moveRandomly();
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-                    HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
-                    coordinate = hAI.findMax();
+					std::pair<int,int> bestMove = findBestMoveZ(CurrentPlayer,0);
+					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
+                    //HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
+                    //coordinate = hAI.findMax();
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					maxDepth=6;
-					std::pair<int,int> bestMove = findBestMove(CurrentPlayer,0);
+					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
 
                 }
@@ -512,7 +520,7 @@ int api(std::string commandLine,int client){
 		std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
 		if(!handleGameInput(client))
 			return 0;
-		std::cout << "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.";
+		std::cout << "Press ENTER to continue.  Use the EXIT command at any time to quit.";
 		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		game.SetBoard(newBoard.GetBoard());
 	}
@@ -525,12 +533,11 @@ int main() {
 	return 0;
 }
 
-
 /**      HARD-AI      **/
 /* Developed by Cutris */
 
 //uses a health-number for the different parts of the board to determine a moves strength
-int heuristicWeight(Reversi childBoard, int x, int y, Square moveOwner, int depth){
+int heuristicWeightZ(Reversi childBoard, int x, int y, Square moveOwner, int depth){
 	int cummulative=0;
 	//got a corner
 	if(	(x==0&&y==0)||//top left
@@ -576,6 +583,57 @@ int heuristicWeight(Reversi childBoard, int x, int y, Square moveOwner, int dept
 
 	return cummulative;
 }
+
+//experimental version
+int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int depth){
+	int cummulative=0;
+	//got a corner
+	if(	(x==0&&y==0)||//top left
+		(x==boardSize-1&&y==boardSize-1)||//bottom right
+		(x==0&&y==boardSize-1)||//bottom left
+		(x==boardSize-1&&y==0)){ //top right
+		if(moveOwner==CurrentPlayer)
+			return  5000;//player wants this bad
+		else
+			return -5000;//player definately doesn't want oppoent to have
+	}
+	//edge next to empty corner
+/*	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==empty)||
+		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==empty)||
+		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==empty)||
+		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==empty)){
+			if(moveOwner==CurrentPlayer)
+				return -1500;
+			else
+				return 1500;
+	}*/
+	//got an edge
+	if( x==0||//left edge
+		x==boardSize-1||//right edge
+		y==0||//top edge
+		y==boardSize-1){//bottom edge
+		if(moveOwner==CurrentPlayer)
+			return 1500;
+		else
+			return -1500;
+	}
+	//avoid these
+	if( x==1||x==boardSize-2){
+		if(moveOwner==CurrentPlayer)
+			cummulative+= -1000;//in this case player doesn't want this move
+		else
+			cummulative+= 1000;//player would like his opponent to make this move
+	}
+	if( y==1||y==boardSize-2){
+		if(moveOwner==CurrentPlayer)
+			cummulative+= -1000;//in this case player doesn't want this move
+		else
+			cummulative+= 1000;//player would like his opponent to make this move
+	}
+
+	return cummulative;
+}
+
 
 //simply checks to see if the passed board is "game-over"
 int endGameEvaluator(Reversi childBoard){
@@ -641,7 +699,7 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		//forecastedMoveWeights is private to this move
 		//and will be replaced when we itterate to the next
 		//move of this stage
-		forecastedMoveWeight+=heuristicWeight(	childBoard,
+		forecastedMoveWeight+=heuristicWeightZ(	childBoard,
 												vals[possibleMove].first,
 												vals[possibleMove].second,
 												forecastPlayer, depth);
@@ -653,16 +711,17 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
 		if(	depth<maxDepth&&//if not at our maximum allowed recursion
-			heuristicWeight(childBoard,//here we say that we don't want to bother
+			heuristicWeightZ(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
 							forecastPlayer, depth)!=-10000){//opponent taking a corner 
 				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
 				forecastedMoveWeight+=checkForWeightZ(childBoard,nextPlayer,depth+1);
 		}
-		else{
+/*		else{
 			return childBoard.Count(CurrentPlayer)*100+endGameEvaluator(childBoard);
-		}
+		}*///found the final board at this depth is not evaluated for each possible move
+
 		//keep track of which move is the best at this stage of the branch
 		//MaxMoveWeight is private to this stage of the branch
 		//and will be returned as the maximum possible move weight
@@ -678,12 +737,78 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 			break;
 		
 	}
-	return MaxMoveWeight;
+	return MaxMoveWeight+vals.size();//decided to add the num of avail
+}
+
+//experimental version
+int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
+	//MaxMoveWeight is private to this branch of the tree
+	//but publicly used to the childBoards (leaf-nodes)
+	int MaxMoveWeight=-99999;
+
+	std::vector< std::pair<int,int> >vals=parentBoard.GetValidMoves(forecastPlayer);
+
+	//here we itterate through the moves, creating a private object for each
+	//move that contains some private variables and a private boardState that
+	//records the addition of the new move to the parentBoard that was passed in
+	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){
+		int forecastedMoveWeight=0;
+		Square nextPlayer;
+		//this childBoard is private to this particular move
+		//and will record this move as a new state of the board
+		//to be passed recursively for examination of new moves
+		//that will be available after this move.
+		Reversi childBoard(boardSize);				
+		childBoard.SetBoard(parentBoard.GetBoard());
+
+		//evaluate and assign a weight to this move
+		//forecastedMoveWeights is private to this move
+		//and will be replaced when we itterate to the next
+		//move of this stage
+		forecastedMoveWeight+=heuristicWeightY(	childBoard,
+												vals[possibleMove].first,
+												vals[possibleMove].second,
+												forecastPlayer, depth);
+
+		//now add the move to this private board
+		childBoard.DoMove(	vals[possibleMove].first,
+							vals[possibleMove].second,
+							forecastPlayer);
+		//we will pass a copy of this board recursively
+		//here, we attempt to only recurse if necessary 
+		if(	depth<maxDepth&&//if not at our maximum allowed recursion
+			heuristicWeightY(childBoard,//here we say that we don't want to bother
+							vals[possibleMove].first,//checking further down this move's
+							vals[possibleMove].second,//lineage if it involves the
+							forecastPlayer, depth)!=-10000){//opponent taking a corner 
+				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
+				forecastedMoveWeight+=checkForWeightY(childBoard,nextPlayer,depth+1);
+		}
+/*		else{
+			return childBoard.Count(CurrentPlayer)*100+endGameEvaluator(childBoard);
+		}*///found the final board at this depth is not evaluated for each possible move
+
+		//keep track of which move is the best at this stage of the branch
+		//MaxMoveWeight is private to this stage of the branch
+		//and will be returned as the maximum possible move weight
+		if(forecastedMoveWeight>MaxMoveWeight)
+			MaxMoveWeight=forecastedMoveWeight;	
+		//stop itterating through the for loop looking at the next available
+		//move, if we have already found a great move (alpha-beta, pruning)
+		//we use a different acceptable weight at the beginning of the game.
+		if(childBoard.Count(empty)>53){
+			if(MaxMoveWeight>500*maxDepth)
+				break;
+		}else if(MaxMoveWeight>900*maxDepth)
+			break;
+		
+	}
+	return MaxMoveWeight+numOfAvailableMovesEvaluator(parentBoard,forecastPlayer);//decided to add the num of avail
 }
 
 //takes the game board and creates a tree of moves, passing a game board with
 //each immediately available move, to checkForWeightz
-std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
+std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth){
 	int maxMoveWeight=-99999,immediatePlusForecastWeights=-99999,maxPossibleMove=0;
 	Square nextPlayer;
 	//vals will hold the possible moves for the player we want to forcast at this depth
@@ -697,7 +822,7 @@ std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
 		boardForAPrimaryMove.DoMove(vals[possibleMove].first,
 									vals[possibleMove].second,
 									forecastPlayer);
-		immediateMoveWeights+=heuristicWeight(	boardForAPrimaryMove,
+		immediateMoveWeights+=heuristicWeightZ(	boardForAPrimaryMove,
 										vals[possibleMove].first,
 										vals[possibleMove].second,
 										forecastPlayer, depth);
@@ -713,3 +838,41 @@ std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
 
 }
 
+//experimental version
+std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth){
+	srand ( time(NULL) );
+	int maxMoveWeight=-99999,immediatePlusForecastWeights=0,maxPossibleMove=0;
+	Square nextPlayer;
+	std::vector< std::pair<int,int> >movesTiedForTop;
+	//vals will hold the possible moves for the player we want to forcast at this depth
+	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);
+	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){	
+		int immediateMoveWeights=0;
+		Reversi boardForAPrimaryMove(boardSize);
+		//new board (branch to tree) for each possibleMove created each itteration
+		boardForAPrimaryMove.SetBoard(game.GetBoard());
+		//add this possible move to its board
+		boardForAPrimaryMove.DoMove(vals[possibleMove].first,
+									vals[possibleMove].second,
+									forecastPlayer);
+		immediateMoveWeights+=heuristicWeightY(	boardForAPrimaryMove,
+										vals[possibleMove].first,
+										vals[possibleMove].second,
+										forecastPlayer, depth);
+		nextPlayer = (forecastPlayer == player1 ? player2 : player1);//figure out who is the next player
+		immediatePlusForecastWeights+=checkForWeightY(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeightZ())
+		if(immediatePlusForecastWeights>maxMoveWeight){	//if this possible Move's maximum outcome is bigger
+//			if(movesTiedForTop.size()>0)
+//				movesTiedForTop.clear();
+//			movesTiedForTop.push_back(vals[possibleMove]);
+			maxMoveWeight=immediatePlusForecastWeights;	//keep it as the new maximum overall
+			maxPossibleMove=possibleMove;	//and remember which move that maximum belongs to
+		}//else if(immediatePlusForecastWeights==maxMoveWeight){
+//			movesTiedForTop.push_back(vals[possibleMove]);
+//		}
+	}
+	std::cout<<"Value of this move:"<<maxMoveWeight<<std::endl;
+//	int randomOfTheTopMoves = rand() % movesTiedForTop.size();
+	return vals[maxPossibleMove];//when done checking down each branch of possible Moves send the best move back
+
+}
