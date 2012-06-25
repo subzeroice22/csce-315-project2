@@ -22,7 +22,7 @@
 #include <cctype>//for upper to lower
 #include "UnitReversi.h"//#includes <vector>
 //#include <WinSock2.h>
-#include "AI.h"
+#include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
 int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4;
@@ -329,21 +329,37 @@ int handlePregameInput(int client){
 			break;
 		}
 		else if(input=="7"){
-		    AIlevelP2="MEDIUM";
+		    AIlevelP2="PRUNE";
 		    AIlevelP1="OFF";
 		    std::cout<<"OK\n";
-			std::cout<<"P1:Human, P2:HARD-AI\n";
+			std::cout<<"P1:Human, P2:PRUNE-AI\n";
 		    displayOn=true;
 			break;
 		}
 		else if(input=="8"){
+		    AIlevelP2="PRUNE";
+		    AIlevelP1="MEDIUM";
+		    std::cout<<"OK\n";
+			std::cout<<"P1:MEDIUM, P2:PRUNE-AI\n";
+		    displayOn=true;
+			break;
+		}
+		else if(input=="9"){
+		    AIlevelP2="PRUNE";
+		    AIlevelP1="HARD";
+		    std::cout<<"OK\n";
+			std::cout<<"P1:HARD, P2:PRUNE-AI\n";
+		    displayOn=true;
+			break;
+		}
+		/*else if(input=="8"){
 		    AIlevelP1="MEDIUM";
 		    AIlevelP2="HARD";
 		    std::cout<<"OK\n";
 			std::cout<<"P1:"<<AIlevelP1<<"-AI, P2:"<<AIlevelP2<<"-AI\n";
 		    displayOn=true;
 			break;
-		}
+		}*/
 		else if(input=="88"){
 		    AIlevelP1="MEDIUM_DEBG";
 		    AIlevelP2="HARD";
@@ -368,9 +384,12 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth);
 
 //receives all input during the execution of the game
 int handleGameInput(int client){
+	int MoveCount=0;
     while(1){
+		
         if(displayOn){
             std::cout<<"-------------------\n";
+			std::cout<<"Move:"<<MoveCount<<"\n";
             std::cout<<"Current Player:"<<CurrentPlayer<<"\n";
             std::cout<<((PlayerIsAI(CurrentPlayer))?("Waiting on AI"):("Human's Move"))<<"\n";
             std::cout<< game;
@@ -383,7 +402,7 @@ int handleGameInput(int client){
 				const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
 				std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
 				std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
-				std::cout<< "The game has ended\n"
+				std::cout<< "The game has ended after "<<MoveCount<<" moves!\n"
 						<<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
 						<<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
 				if(n1==n2)
@@ -401,13 +420,17 @@ int handleGameInput(int client){
 				continue;
 			}
         }
-        
+        MoveCount++;
         {//Input-Gathering Block
             if(PlayerIsAI(CurrentPlayer)){
                 //CurrentPlayer is an AI
                 if(AIlevel(CurrentPlayer)=="EASY"){
                     moveRandomly();
                 }
+				else if(AIlevel(CurrentPlayer)=="PRUNE"){
+					AlphaBetaAI ai(game, CurrentPlayer, 3);
+					coordinate = ai.findMax();
+				}
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
 					std::pair<int,int> bestMove = findBestMoveZ(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
@@ -928,3 +951,36 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth){
 	return vals[maxPossibleMove];//when done checking down each branch of possible Moves send the best move back
 
 }
+
+
+
+/*
+
+Current Player:@
+Waiting on AI
+  _ _ _ _ _ _ _ _
+1|@|@|O|O|O|O|O|O|
+2|O|O|@|O|@|O|O|O|
+3|O|@|@|@|O|O|@|O|
+4|O|@|@|@|@|O|@|O|
+5|O|@|@|@|@|@|O|O|
+6|@|@|@|@|@|@|@|O|
+7|@|@|@|@|@|O|O|O|
+8|@|@|@|@|@|@|O|O|
+  a b c d e f g h
+The game has ended
+Player1 (MEDIUM-AI)[O] conquered 28 squares.
+Player2 (PRUNE-AI)[@] conquered 36 squares.
+The winner is Player2(PRUNE-AI)
+Congratulations!
+
+^^EXACT DATA EVERY TIME^^
+
+
+
+
+
+
+
+*/
+
