@@ -26,7 +26,7 @@
     <ClInclude Include="..\..\UnitReversi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\AI.h">
+    <ClInclude Include="..\..\alphaBetaAI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

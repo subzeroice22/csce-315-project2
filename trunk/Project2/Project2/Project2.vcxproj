@@ -15,7 +15,7 @@
     <ClCompile Include="..\..\UnitReversiMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\AI.h" />
+    <ClInclude Include="..\..\alphaBetaAI.h" />
     <ClInclude Include="..\..\UnitReversi.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
