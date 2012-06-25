@@ -25,7 +25,7 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4;
+int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -232,9 +232,34 @@ void moveRandomly(){
 //takes input from the user that will set definations for the game settings
 int handlePregameInput(int client){
 	while(1){
-		const std::string input = GetInput(client);
+		std::string input = GetInput(client);
 		if(input=="EXIT"){
 			return 0;
+		}
+
+		else if(input=="TEST_HARD"){
+			AIlevelP1="HARD";
+			AIlevelP2="HARD";
+			input=GetInput(client);
+			if(isdigit(input[0]))
+				totalExecutions=atoi(input.c_str());
+			std::cout<<"HARD V HARD\n";
+		}
+		else if(input=="TEST_MEDIUM"){
+			AIlevelP1="HARD";
+			AIlevelP2="MEDIUM";
+			input=GetInput(client);
+			if(isdigit(input[0]))
+				totalExecutions=atoi(input.c_str());
+			std::cout<<"HARD V MEDIUM\n";
+		}
+		else if(input=="TEST_EASY"){
+			AIlevelP1="HARD";
+			AIlevelP2="EASY";
+			input=GetInput(client);
+			if(isdigit(input[0]))
+				totalExecutions=atoi(input.c_str());
+			std::cout<<"HARD V EASY\n";
 		}
 		else if(input=="DISPLAY_ON" ){
 			displayOn = true;
@@ -249,26 +274,6 @@ int handlePregameInput(int client){
 		else if(input=="BLACK"){
 		    AIlevelP2=AIlevelP1;
 		    AIlevelP1="OFF";
-		}
-		else if(input=="TEST_HARD"){
-			AIlevelP1="HARD";
-			AIlevelP2="HARD";
-			std::cout<<"HARD V HARD\n";
-		}
-		else if(input=="TEST_MEDIUM"){
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			std::cout<<"HARD V MEDIUM\n";
-		}
-		else if(input=="MEDIUM"){
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			std::cout<<"HARD V MEDIUM\n";
-		}
-		else if(input=="TEST_EASY"){
-			AIlevelP1="HARD";
-			AIlevelP2="EASY";
-			std::cout<<"HARD V EASY\n";
 		}
 		else if(input=="BLACK"){
 			AIlevelP2=AIlevelP1;
@@ -300,7 +305,7 @@ int handlePregameInput(int client){
 		    AIlevel(aiPlayer) ="HARD";
 			std::cout<<"OK\n";
 		}
-		else if(input[0]=='P'){
+/*		else if(input[0]=='P'){
 		    if(input[1]=='1'){
 		        AIlevelP1=input.substr(2);
                 std::cout<<"OK\n";
@@ -351,7 +356,7 @@ int handlePregameInput(int client){
 			std::cout<<"P1:HARD, P2:PRUNE-AI\n";
 		    displayOn=true;
 			break;
-		}
+		}*///commented all of this out while testing totalExecutions input
 		/*else if(input=="8"){
 		    AIlevelP1="MEDIUM";
 		    AIlevelP2="HARD";
