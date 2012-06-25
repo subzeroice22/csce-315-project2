@@ -25,7 +25,7 @@
 #include "AI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=6;
+int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -370,7 +370,7 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth);
 int handleGameInput(int client){
     while(1){
         if(displayOn){
-            std::cout<<"\n-------------------\n";
+            std::cout<<"-------------------\n";
             std::cout<<"Current Player:"<<CurrentPlayer<<"\n";
             std::cout<<((PlayerIsAI(CurrentPlayer))?("Waiting on AI"):("Human's Move"))<<"\n";
             std::cout<< game;
@@ -409,14 +409,12 @@ int handleGameInput(int client){
                     moveRandomly();
                 }
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-					maxDepth;
 					std::pair<int,int> bestMove = findBestMoveZ(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                     //HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
                     //coordinate = hAI.findMax();//49,15vsZ/43,21vsY
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					testMaxDepth;
 					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
 
@@ -596,21 +594,13 @@ int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int dep
 	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==moveOwner)||
 		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==moveOwner)||
 		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==moveOwner)||
-		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==moveOwner)){
+		(((x==6&&y==7)||(x==7&&y==6))&&childBoard.GetSquare(7,7)==moveOwner)){
 			if(moveOwner==CurrentPlayer)
 				return 5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
 			else
-				return 5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
+				return -5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
 	}
-	if( ((x==1&&y==1)&&childBoard.GetSquare(0,0)==empty)||
-		((x==1&&y==6)&&childBoard.GetSquare(0,7)==empty)||
-		((x==6&&y==1)&&childBoard.GetSquare(7,0)==empty)||
-		((x==6&&y==6)&&childBoard.GetSquare(7,7)==empty) ){
-			if(moveOwner==CurrentPlayer)
-				return -5000/(depth+1);
-			else
-				return 5000/(depth+1);
-	}//adding this brought from38,26vsZ to 45,19vsZ
+	//sweet-sixteen corner
 	if( ((x==2&&y==2)&&childBoard.GetSquare(0,0)==empty)||
 		((x==2&&y==5)&&childBoard.GetSquare(0,7)==empty)||
 		((x==5&&y==2)&&childBoard.GetSquare(7,0)==empty)||
@@ -619,29 +609,63 @@ int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int dep
 				return 2500/(depth+1);
 			else
 				return -2500/(depth+1);
-	}//adding this brought from38,26vsZ to 45,19vsZ
-	//got an edge
-	if( x==0||//left edge									//adding(1)
+	}
+	//deadman's corner
+	if( ((x==1&&y==1)&&childBoard.GetSquare(0,0)==empty)||
+		((x==1&&y==6)&&childBoard.GetSquare(0,7)==empty)||
+		((x==6&&y==1)&&childBoard.GetSquare(7,0)==empty)||
+		((x==6&&y==6)&&childBoard.GetSquare(7,7)==empty) ){
+			if(moveOwner==CurrentPlayer)
+				return -5000/(depth+1);
+			else
+				return 5000/(depth+1);
+	}
+	//got an edge, blocking a straightaway
+	if( (x==0&&(y<boardSize-3&&y>2))&&
+		childBoard.GetSquare(x+1,y)==GetOtherPlayer(moveOwner))
+		if(moveOwner==CurrentPlayer)
+			cummulative+= 1500/(depth+1);
+		else
+			cummulative+= -1500/(depth+1);
+	if( (x==boardSize-1&&(y<boardSize-3&&y>2))&&
+		childBoard.GetSquare(x-1,y)==GetOtherPlayer(moveOwner))
+		if(moveOwner==CurrentPlayer)
+			cummulative+= 1500/(depth+1);
+		else
+			cummulative+= -1500/(depth+1);
+	if( (y==0&&(x<boardSize-3&&x>2))&&
+		childBoard.GetSquare(x,y+1)==GetOtherPlayer(moveOwner))
+		if(moveOwner==CurrentPlayer)
+			cummulative+= 1500/(depth+1);
+		else
+			cummulative+= -1500/(depth+1);
+	if( (y==boardSize-1&&(x<boardSize-3&&x>2))&&
+		childBoard.GetSquare(x,y-1)==GetOtherPlayer(moveOwner))
+		if(moveOwner==CurrentPlayer)
+			cummulative+= 1500/(depth+1);
+		else
+			cummulative+= -1500/(depth+1);
+	if( x==0||//left edge
 		x==boardSize-1||//right edge
 		y==0||//top edge
 		y==boardSize-1){//bottom edge
 		if(moveOwner==CurrentPlayer)
-			return 1500/(depth+1);
+			cummulative+= 750/(depth+1);
 		else
-			return -1500/(depth+1);
+			cummulative-= 750/(depth+1);
 	}
 	//avoid these
 	if( x==1||x==boardSize-2){
 		if(moveOwner==CurrentPlayer)
-			cummulative+= -1000/(depth+1);//in this case player doesn't want this move
+			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
 		else
-			cummulative+= 1000/(depth+1);//player would like his opponent to make this move
+			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
 	}
 	if( y==1||y==boardSize-2){
 		if(moveOwner==CurrentPlayer)
-			cummulative+= -1000/(depth+1);//in this case player doesn't want this move
+			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
 		else
-			cummulative+= 1000/(depth+1);//player would like his opponent to make this move
+			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
 	}
 
 	return cummulative;
@@ -659,9 +683,9 @@ int endGameEvaluator(Reversi childBoard){
 			else
 				opponent=player1;
 			if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
-				return childBoard.Count(CurrentPlayer)*1000;
+				return childBoard.Count(CurrentPlayer)*10000;
 			else
-				return childBoard.Count(opponent)*(-1000);
+				return childBoard.Count(opponent)*(-10000);
 	}
 	return 0;
 }
@@ -792,7 +816,7 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
-		if(	depth<maxDepth&&//if not at our maximum allowed recursion
+		if(	depth<testMaxDepth&&//if not at our maximum allowed recursion
 			heuristicWeightY(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
@@ -814,14 +838,14 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 		//stop itterating through the for loop looking at the next available
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
-/*		if(childBoard.Count(empty)>53){
-			if(MaxMoveWeight>500*maxDepth)
+		if(childBoard.Count(empty)>53){
+			if(MaxMoveWeight>500*testMaxDepth)
 				break;
-		}else if(MaxMoveWeight>900*maxDepth)
-			break;*/
-		weights.push_back(forecastedMoveWeight);
+		}else if(MaxMoveWeight>900*testMaxDepth)
+			break;
+/*		weights.push_back(forecastedMoveWeight);
 		if(weights.size()==vals.size())
-			std::cout<<possibleMove+1;
+			std::cout<<possibleMove+1;*/
 		
 	}
 /*	if(vals.size()==0&&parentBoard.Count(empty)>4)
