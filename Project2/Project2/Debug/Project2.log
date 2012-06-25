@@ -1,4 +1,4 @@
-﻿Build started 6/25/2012 3:29:33 AM.
+﻿Build started 6/25/2012 5:05:33 AM.
      1>Project "Y:\CSCE315Project2\Project2\Project2\Project2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Project2.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -14,11 +14,11 @@
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\string.h(105) : see declaration of 'strcpy'
      1>y:\csce315project2\unitreversimain.cpp(217): warning C4018: '<' : signed/unsigned mismatch
      1>y:\csce315project2\unitreversimain.cpp(224): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>y:\csce315project2\unitreversimain.cpp(695): warning C4018: '<' : signed/unsigned mismatch
-     1>y:\csce315project2\unitreversimain.cpp(764): warning C4018: '<' : signed/unsigned mismatch
-     1>y:\csce315project2\unitreversimain.cpp(837): warning C4018: '<' : signed/unsigned mismatch
-     1>y:\csce315project2\unitreversimain.cpp(864): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>y:\csce315project2\unitreversimain.cpp(871): warning C4018: '<' : signed/unsigned mismatch
+     1>y:\csce315project2\unitreversimain.cpp(700): warning C4018: '<' : signed/unsigned mismatch
+     1>y:\csce315project2\unitreversimain.cpp(771): warning C4018: '<' : signed/unsigned mismatch
+     1>y:\csce315project2\unitreversimain.cpp(846): warning C4018: '<' : signed/unsigned mismatch
+     1>y:\csce315project2\unitreversimain.cpp(873): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>y:\csce315project2\unitreversimain.cpp(880): warning C4018: '<' : signed/unsigned mismatch
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"Y:\CSCE315Project2\Project2\Debug\Project2.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Project2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"Y:\CSCE315Project2\Project2\Debug\Project2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"Y:\CSCE315Project2\Project2\Debug\Project2.lib" /MACHINE:X86 Debug\UnitReversi.obj
          Debug\UnitReversiMain.obj
@@ -33,4 +33,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:01:28.66
+Time Elapsed 00:02:27.69
