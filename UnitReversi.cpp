@@ -8,6 +8,7 @@
 
 #include "UnitReversi.h" 
 #include <cassert> 
+#include <iostream>
 
 Reversi::Reversi(const int size) 
   : mBoard(size,std::vector<Square>(size,empty)){ 
@@ -329,6 +330,7 @@ const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const in
   const int size = board.size(); 
   assert(x >= 0); 
   assert(y >= 0); 
+  //std::cout<<"X:"<<x<<" size:"<<size<<"\n";
   assert(x < size); 
   assert(y < size); 
   return board[y][x]; 

@@ -121,17 +121,20 @@ const bool IsInt(const std::string& s, int& rInt){
 const std::string GetInput(int client) {
 	if(client != 0) {
 		char input[30];
-		std::string s = "";
+		std::stringstream ss;
 		recv(client, input, 30, 0);
 	
 		for(int i = 0; input[i] != '\n'; i++) {
-			s = s + input[i];
+			ss<<(toupper(input[i]));
 		}
 	
-		return s;
+		return ss.str();
 	} else {
 		string input;
 		std::cin >> input;
+		for(int i=0; i<input.size(); i++){
+			input[i] = toupper(input[i]);
+		}
 		return input;
 	}
 	
