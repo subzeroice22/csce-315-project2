@@ -634,8 +634,8 @@ int handleGameInput(int client){
                 std::cout<<"::";
 				send(client, "::", 2, 0);
                 //const std::string input = GetInput();
-				char input[30];
-				recv(client, input, 30, 0);
+				char input[10];
+				recv(client, input, 10, 0);
 				
                 const bool isValidCoordinate = IsCoordinate(input, coordinate); 
                 if (isValidCoordinate == false){
