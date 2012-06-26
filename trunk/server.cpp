@@ -59,8 +59,8 @@ int main() {
 	cout << "Client socket:\t" << client_sock << '\n';
 	
 	gameStart reversi;
-	//reversi.api("START", client_sock);
-	reversi.api("START", 0);
+	reversi.api("START", client_sock);
+	//reversi.api("START", 0);
 	
 	//close the client's connection
 	close(client_sock);
