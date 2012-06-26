@@ -25,8 +25,8 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
-bool displayOn=true,test=false,server=false;
+int boardSize=8,randomMove,isHuman,maxDepth;
+bool displayOn=true,test=false,server=true;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
 std::string AIlevelP1 = "OFF"; //Defaults P2 'OFF' i.e. P2==Human.
@@ -120,12 +120,32 @@ const bool IsInt(const std::string& s, int& rInt)
   return true; 
 } 
 
+
+const std::string GetInput(int client) {
+	char input[30];
+	std::string s = "";
+	recv(client, input, 30, 0);
+	
+	for(int i = 0; input[i] != '\n'; i++) {
+		s = s + input[i];
+	}
+	
+	return s;
+}
+
 //Handles all input and drops the newline char.  Either recv or getlines.
+/*
 const std::string GetInput(int client){
-	char input[30],c;
+	char input[30];
+	char c;
 	std::string s; 
+	memset(input, 0, sizeof(input));
+	ssize_t a = 0;
+	a = recv(client, input, sizeof(input),0);
+	std::cout << "" << a << ' <<<\n';
+	
 	if(server==true){
-		//recv(client, input, sizeof(input),0);
+		//int a = recv(client, input, sizeof(input),0);
 		s=input;
 	}else{
 		std::getline(std::cin,s,'\n'); 
@@ -135,21 +155,17 @@ const std::string GetInput(int client){
 		s[i]=toupper(c);
 	}
 	return s; 
-}
+}*/
 
 //Handles all output.  Takes a string and either cout or sends
 void PrintOut(std::string inString,int client){
-
-	char* charToSend = new char[inString.size()];
-	//char charToSend[80];
+	char charToSend[30];
 	strcpy(charToSend,inString.c_str());
 	if(server==true){
-		//send(client,charToSend+'\n',sizeof(charToSend+'\n'),0);
+		send(client,charToSend+'\n',sizeof(charToSend+'\n'),0);
 	}else {
 		std::cout<<inString;
 	}
-
-//	delete [] charToSend;
 }
 
 //Breaks up the coordinate input for an x and y value
@@ -177,7 +193,7 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
 
 //Up front determination whether the users coordinate is a valid input type 
 const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate){
-    if(input.size()!=2) return false;
+    if(input.size()!=3) return false;
 	//TODO: need error (bounds) checking on x and y
     int x, y;
     x = input[0] - 'A';
@@ -192,21 +208,25 @@ const int AskUserForBoardSize(int client){
   //Get the board's size 
   while (1){
     std::cout << "Please enter the size of the reversi board" << std::endl; 
+	send(client, "Please enter the size of the reversi board\n", 43, 0);
     const std::string input = GetInput(client); 
     int size = -1; 
     if ( IsInt(input,size) == false) 
     { 
       std::cout << "Please enter an integer value. " << std::endl; 
+	  send(client, "Please enter an integer value. \n", 32, 0);
       continue; 
     } 
     if ( size < 4) 
     { 
       std::cout << "Please enter an integer value bigger than 4. " << std::endl; 
+	  send(client, "Please enter an integer value bigger than 4. \n", 47, 0);
       continue; 
     } 
     if ( size > 16) 
     { 
       std::cout << "Please enter an integer value less than 16. " << std::endl; 
+	  send(client, "Please enter an integer value less than 16. \n", 45, 0);
       continue; 
     } 
     return size; 
@@ -214,13 +234,20 @@ const int AskUserForBoardSize(int client){
 }
 
 //inserts the possibleMove symbol into the proper locations of the board
-void showPossibleMoves(){
+void showPossibleMoves(int client){
 	Reversi tempValid(boardSize);
 	tempValid.SetBoard(game.GetBoard());
 	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(CurrentPlayer);
 	for(int i=0; i<vals.size(); i++)
 		tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
 	std::cout<<tempValid<<"\n";
+	
+	ostringstream osTempValid;
+	osTempValid << tempValid;
+	
+	std::string sTempValid = osTempValid.str();
+	send(client, sTempValid.c_str(), sTempValid.size(), 0);
+	
 }
 
 //uses the current time as a randomizing seed to select from available moves
@@ -236,140 +263,159 @@ void moveRandomly(){
 //takes input from the user that will set definations for the game settings
 int handlePregameInput(int client){
 	while(1){
-		std::string input = GetInput(client);
-		if(input=="EXIT"){
+		const std::string input = GetInput(client);
+		//if(input=="EXIT"){
+		if( strncmp(input.c_str(), "EXIT", 4) == 0) {
 			return 0;
 		}
-
-		else if(input=="TEST_HARD"){
-			AIlevelP1="HARD";
-			AIlevelP2="HARD";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V HARD\n";
-		}
-		else if(input=="TEST_MEDIUM"){
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V MEDIUM\n";
-		}
-		else if(input=="TEST_EASY"){
-			AIlevelP1="HARD";
-			AIlevelP2="EASY";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V EASY\n";
-		}
-		else if(input=="DISPLAY_ON" ){
+		//else if(input=="DISPLAY_ON" ){
+		else if( strncmp(input.c_str(), "DISPLAY_ON", 10) == 0) {
 			displayOn = true;
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 			break;
 		}
-		else if(input=="DISPLAY_OFF"){
+		//else if(input=="DISPLAY_OFF"){
+		else if( strncmp(input.c_str(), "DISPLAY_OFF", 11) == 0) {
 			displayOn = false;
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 			break;
 		}
-		else if(input=="BLACK"){
+		//else if(input=="BLACK"){
+		else if( strncmp(input.c_str(), "BLACK", 5) == 0) {
 		    AIlevelP2=AIlevelP1;
 		    AIlevelP1="OFF";
 		}
-		else if(input=="BLACK"){
+		//else if(input=="TEST_HARD"){
+		else if( strncmp(input.c_str(), "TEST_HARD", 9) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="HARD";
+			std::cout<<"HARD V HARD\n";
+			send(client, "HARD V HARD\n", 12, 0);
+		}
+		//else if(input=="TEST_MEDIUM"){
+		else if( strncmp(input.c_str(), "TEST_MEDIUM", 11) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="MEDIUM";
+			std::cout<<"HARD V MEDIUM\n";
+			send(client, "HARD V MEDIUM\n", 14, 0);
+		}
+		//else if(input=="MEDIUM"){
+		else if( strncmp(input.c_str(), "MEDIUM", 6) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="MEDIUM";
+			std::cout<<"HARD V MEDIUM\n";
+			send(client, "HARD V MEDIUM\n", 14, 0);
+		}
+		//else if(input=="TEST_EASY"){
+		else if( strncmp(input.c_str(), "TEST_EASY", 9) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="EASY";
+			std::cout<<"HARD V EASY\n";
+			send(client, "HARD V EASY\n", 12, 0);
+		}
+		//else if(input=="BLACK"){
+		else if( strncmp(input.c_str(), "BLACK", 5) == 0) {
 			AIlevelP2=AIlevelP1;
 		    AIlevelP1="OFF";
 			std::cout<<"BLACK\n";
+			send(client, "BLACK\n", 6, 0);
 		}
-		else if(input=="WHITE"){
+		//else if(input=="WHITE"){
+		else if( strncmp(input.c_str(), "WHITE", 5) == 0) {
 		    AIlevelP1=AIlevelP2;
 		    AIlevelP2="OFF";
 			std::cout<<"WHITE\n";
+			send(client, "WHITE\n", 6, 0);
 		}
-		else if(input=="NO_AI"){
+		//else if(input=="NO_AI"){
+		else if( strncmp(input.c_str(), "NO_AI", 5) == 0) {
 		    AIlevelP1="OFF";
 		    AIlevelP2="OFF";
 		    std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 		}
-		else if(input=="EASY"){
+		//else if(input=="EASY"){
+		else if( strncmp(input.c_str(), "EASY", 4) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="EASY";
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 		}
-		else if(input=="MEDIUM"){
+		//else if(input=="MEDIUM"){
+		else if( strncmp(input.c_str(), "MEDIUM", 6) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="MEDIUM";
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 		}
-		else if(input=="HARD"){
+		//else if(input=="HARD"){
+		else if( strncmp(input.c_str(), "HARD", 4) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="HARD";
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 		}
-/*		else if(input[0]=='P'){
+		else if(input[0]=='P'){
 		    if(input[1]=='1'){
 		        AIlevelP1=input.substr(2);
                 std::cout<<"OK\n";
+				send(client, "OK\n", 3, 0);
 		    }
 		    else if(input[1]=='2'){
 		        AIlevelP2=input.substr(2);
                 std::cout<<"OK\n";
+				send(client, "OK\n", 3, 0);
 		    }
-		    else{std::cout<<"ILLEGAL\n";}
+		    else{std::cout<<"ILLEGAL\n"; send(client, "ILLEGAL\n", 7, 0);}
 		}
-		else if(input=="4X4"){
+		//else if(input=="4X4"){
+		else if( strncmp(input.c_str(), "4X4", 3) == 0) {
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 			boardSize=4;
 		}
 
-		else if(input=="8X8"){
+		//else if(input=="8X8"){
+		else if( strncmp(input.c_str(), "8X8", 3) == 0) {
 			std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 			boardSize=8;
 		}
-		else if(input=="6"){
+		//else if(input=="6"){
+		else if( strncmp(input.c_str(), "6", 1) == 0) {
 		    AIlevelP1="MEDIUM";
 		    AIlevelP2="OFF";
 		    std::cout<<"OK\n";
+			send(client, "OK\n", 3, 0);
 			std::cout<<"P1:HARD-AI, P2:Human\n";
+			send(client, "P1:HARD-AI, P2:Human\n", 21, 0);
 		    displayOn=true;
 			break;
 		}
-		else if(input=="7"){
-		    AIlevelP2="PRUNE";
+		//else if(input=="7"){
+		else if( strncmp(input.c_str(), "7", 1) == 0) {
+		    AIlevelP2="MEDIUM";
 		    AIlevelP1="OFF";
 		    std::cout<<"OK\n";
-			std::cout<<"P1:Human, P2:PRUNE-AI\n";
+			send(client, "OK\n", 3, 0);
+			std::cout<<"P1:Human, P2:HARD-AI\n";
+			send(client, "P1:Human, P2:HARD-AI\n", 21, 0);
 		    displayOn=true;
 			break;
 		}
-		else if(input=="8"){
-		    AIlevelP2="PRUNE";
-		    AIlevelP1="MEDIUM";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:MEDIUM, P2:PRUNE-AI\n";
-		    displayOn=true;
-			break;
-		}
-		else if(input=="9"){
-		    AIlevelP2="PRUNE";
-		    AIlevelP1="HARD";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:HARD, P2:PRUNE-AI\n";
-		    displayOn=true;
-			break;
-		}*///commented all of this out while testing totalExecutions input
-		/*else if(input=="8"){
+		//else if(input=="8"){
+		else if( strncmp(input.c_str(), "8", 1) == 0) {
 		    AIlevelP1="MEDIUM";
 		    AIlevelP2="HARD";
 		    std::cout<<"OK\n";
 			std::cout<<"P1:"<<AIlevelP1<<"-AI, P2:"<<AIlevelP2<<"-AI\n";
 		    displayOn=true;
 			break;
-		}*/
-		else if(input=="88"){
+		}
+		//else if(input=="88"){
+		else if( strncmp( input.c_str(), "88", 2) == 0) {
 		    AIlevelP1="MEDIUM_DEBG";
 		    AIlevelP2="HARD";
 		    std::cout<<"OK\n";
@@ -378,142 +424,268 @@ int handlePregameInput(int client){
 			break;
 		}
 		else{
-		    if(input!="?"){std::cout<<"ILLEGAL\n";}
+			//if(input!="?"){std::cout<<"ILLEGAL\n";}
+			if( strncmp(input.c_str(), "?", 1) != 0) {std::cout<<"ILLEGAL\n"; send(client, "ILLEGAL\n", 8, 0);}
 			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n"; //TODO: Add more..
+			send(client, "WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n", 51, 0);
 		}
 	}
 	return 1;
 }
 
 //forward decleration
-std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth);
-
-//forward decleration
-std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth);
+std::pair<int,int> findBestMove(Square forecastPlayer,int depth);
 
 //receives all input during the execution of the game
 int handleGameInput(int client){
-	int MoveCount=0,numOfGamesCompleted=0,blackWins=0,whiteWins=0;
-    while(numOfGamesCompleted<totalExecutions){
-		
+    while(1){
         if(displayOn){
-            std::cout<<"-------------------\n";
-			std::cout<<"Move:"<<MoveCount<<"\n";
+            std::cout<<"\n-------------------\n";
             std::cout<<"Current Player:"<<CurrentPlayer<<"\n";
             std::cout<<((PlayerIsAI(CurrentPlayer))?("Waiting on AI"):("Human's Move"))<<"\n";
             std::cout<< game;
+		
+			ostringstream osCurrentPlayer;
+			ostringstream osGame;
+			osCurrentPlayer	<< CurrentPlayer;
+			osGame << game;
+			
+			std::string sCurrentPlayer = "Current Player: " + osCurrentPlayer.str() + '\n';
+			std::string sGame = osGame.str();
+		
+			send(client, "\n-------------------\n", 21, 0);
+			send(client, sCurrentPlayer.c_str(), sCurrentPlayer.size(), 0);
+			
+			if(PlayerIsAI(CurrentPlayer)) {
+				send(client, "Waiting on AI\n", 14, 0);
+			} else {
+				send(client, "Human's Move\n", 13, 0);
+			}
+			
+			send(client, sGame.c_str(), sGame.size(), 0);
+			
         }
+
+        //Check if the game has ended 
+        if (game.Count(empty) == 0){
+            //No empty squares 
+            const int n1 = game.Count(player1); 
+            const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
+            std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
+            std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
+            
+			std::cout<< "The game has ended\n"
+                    <<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
+                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n"
+                    <<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
+                    <<"\nCongratulations!\n\n";
+			
+			send(client, "The game has ended\n", 19, 0);
+			
+			ostringstream osP1Name;
+			ostringstream osP2Name;
+			
+			ostringstream osPlayer1;
+			ostringstream osPlayer2;
+			
+			ostringstream osN1;
+			ostringstream osN2;
+			
+			osP1Name << p1Name;
+			osP2Name << p2Name;
+			
+			osPlayer1 << player1;
+			osPlayer2 << player2;
+			
+			osN1 << n1;
+			osN2 << n2;
+			
+			std::string p1SquaresConquered = "Player1 (" + osP1Name.str() + ")[" + osPlayer1.str() + "] conquered " + osN1.str() + " squares.\n";
+			std::string p2SquaresConquered = "Player2 (" + osP2Name.str() + ")[" + osPlayer2.str() + "] conquered " + osN2.str() + " squares.\n";
+			
+			send(client, p1SquaresConquered.c_str(), p1SquaresConquered.size(), 0);
+			send(client, p2SquaresConquered.c_str(), p2SquaresConquered.size(), 0);
+			
+			std::string p1Wins = "The winner is Player1(";
+			std::string p2Wins = "The winner is Player2(";
+			
+			if(n1 > n2) {
+				p1Wins = p1Wins + p1Name + ")";
+				send(client, p1Wins.c_str(), p1Wins.size(), 0);
+			} else {
+				p2Wins = p2Wins + p2Name + ")";
+				send(client, p2Wins.c_str(), p2Wins.size(), 0);
+			}
+			
+			send(client, "\nCongratulations!\n\n", 19, 0);
+					
+             return 1;
+        }
+		if ((game.GetValidMoves(player1).empty()==true)&&
+			(game.GetValidMoves(player2).empty()==true)){
+			//No available moves for either player 
+            const int n1 = game.Count(player1); 
+            const int n2 = game.Count(player2); 
+            std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
+            std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
+            std::cout<< "The game has ended\n"
+                    <<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
+                    <<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n"
+                    <<"It was a draw!\n";
+					
+			send(client, "The game has ended\n", 19, 0);
+			
+			ostringstream osP1Name;
+			ostringstream osP2Name;
+			
+			ostringstream osPlayer1;
+			ostringstream osPlayer2;
+			
+			ostringstream osN1;
+			ostringstream osN2;
+			
+			osP1Name << p1Name;
+			osP2Name << p2Name;
+			
+			osPlayer1 << player1;
+			osPlayer2 << player2;
+			
+			osN1 << n1;
+			osN2 << n2;
+			
+			std::string p1SquaresConquered = "Player1 (" + osP1Name.str() + ")[" + osPlayer1.str() + "] conquered " + osN1.str() + " squares.\n";
+			std::string p2SquaresConquered = "Player2 (" + osP2Name.str() + ")[" + osPlayer2.str() + "] conquered " + osN2.str() + " squares.\n";
+			
+			send(client, p1SquaresConquered.c_str(), p1SquaresConquered.size(), 0);
+			send(client, p2SquaresConquered.c_str(), p2SquaresConquered.size(), 0);
+			
+			send(client, "It was a draw!\n", 15, 0);
+			
+					
+             return 1;
+		}
+
+
+
         //Check if Current Player can actually make a move 
         if (game.GetValidMoves(CurrentPlayer).empty()==true){
-			if(game.GetValidMoves(GetOtherPlayer(CurrentPlayer)).empty()==true){
-				//no player has a move available - end game
-				const int n1 = game.Count(player1); 
-				const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
-				std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
-				std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
-				stringstream ss;
-				std::cout<< "The game has ended after "<<MoveCount<<" moves!\n"
-						<<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
-						<<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
-				if(n1==n2)
-					PrintOut("It's a Draw!\n",client);
-				else{
-					std::cout<<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
-						<<"\nCongratulations!\n\n";
-					if(n1>n2)
-						blackWins++;
-					else
-						whiteWins++;
-				}
-				if(totalExecutions>1){
-					std::stringstream winCountStringStream;
-					winCountStringStream<<"Player1 ("<<p1Name<<") won "<<blackWins<<"\n"<<"Player2 ("<<p2Name<<")won "<<whiteWins<<"\n";
-					PrintOut(winCountStringStream.str(),client);
-				 numOfGamesCompleted++;
-				game.SetBoard(newBoard.GetBoard());
-				 continue;
-				}
-			}else{
-				//If Current Player cannot move, but other player can
-				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
-				CurrentPlayer=GetOtherPlayer(CurrentPlayer);
-				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
-				continue;
-			}
+            //If Current Player cannot move,
+            std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
+			
+			ostringstream osMessage1;
+			osMessage1 << "Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
+			
+			send(client, osMessage1.str().c_str(), osMessage1.str().size(), 0);
+			
+            CurrentPlayer=GetOtherPlayer(CurrentPlayer);
+			ostringstream osMessage2;			
+            std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
+			osMessage2 << "The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
+			send(client, osMessage2.str().c_str(), osMessage2.str().size(), 0);
+			continue;
         }
-        MoveCount++;
+        
         {//Input-Gathering Block
             if(PlayerIsAI(CurrentPlayer)){
                 //CurrentPlayer is an AI
                 if(AIlevel(CurrentPlayer)=="EASY"){
                     moveRandomly();
                 }
-				else if(AIlevel(CurrentPlayer)=="PRUNE"){
-					AlphaBetaAI ai(game, CurrentPlayer, maxDepth);
-					coordinate = ai.findMax();
-				}
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-					std::pair<int,int> bestMove = findBestMoveZ(CurrentPlayer,0);
-					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
-                    //HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
-                    //coordinate = hAI.findMax();//49,15vsZ/43,21vsY
+                    HardAI hAI(game, CurrentPlayer,1,AIlevel(CurrentPlayer).substr(AIlevel(CurrentPlayer).size()-4)=="DEBG");
+                    coordinate = hAI.findMax();
                 }
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
-					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
+					maxDepth=6;
+					std::pair<int,int> bestMove = findBestMove(CurrentPlayer,0);
+					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
 
                 }
-                std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
+                std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
+				
+				ostringstream osAIlevel;
+				ostringstream osCoordinates; 
+				
+				osAIlevel << AIlevel(CurrentPlayer);
+				osCoordinates << char('A'+coordinate.first)<<coordinate.second+1;
+				
+				std::string message = osAIlevel.str() + "-AI Plays @:" + osCoordinates.str() + '\n';
+				
+				send(client, message.c_str(), message.size(), 0);
+				
             }
             else if( !(PlayerIsAI(CurrentPlayer)) ) {
                 //CurrentPlayer is a Human
                 std::cout<<"::";
-                const std::string input = GetInput(client);
+				send(client, "::", 2, 0);
+                const std::string input = GetInput(client);				
+				
                 const bool isValidCoordinate = IsCoordinate(input, coordinate); 
                 if (isValidCoordinate == false){
                     //Input was not a Coordinate
-                    if(input=="EXIT") return 0;
-                    else if(input=="?"){
+                    //if(input=="EXIT") return 0;
+					if( strncmp(input.c_str(), "EXIT", 4) == 0) return 0;
+                   // else if(input=="?"){
+				   else if( strncmp(input.c_str(), "?", 1) == 0) {
                         std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
-                        continue;
+                        send(client, "Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n", 82, 0);
+						continue;
                     }
-                    else if(input=="DISPLAY_OFF"){
+                    //else if(input=="DISPLAY_OFF"){
+					else if( strncmp(input.c_str(), "DISPLAY_OFF", 11) == 0) {
                         displayOn = false;
                         std::cout<<"OK\n";
+						send(client, "OK\n", 3, 0);
                         continue;
                     }
-                    else if(input=="UNDO"){
+                    //else if(input=="UNDO"){
+					else if( strncmp(input.c_str(), "UNDO", 4) == 0) {
                         if(!game.DoUndo()){
                             std::cerr<<"CANNOT UNDO, NOT ENOUGH STATES IN STACK\n";
                             std::cout<<"ILLEGAL\n";
+							send(client, "ILLEGAL\n", 8, 0);
                             continue;
                         }
                         continue;
                     }
-                    else if(input=="REDO"){
+                    //else if(input=="REDO"){
+					else if( strncmp(input.c_str(), "REDO", 4) == 0) {
                         if(!game.DoRedo()){
                             std::cerr<<"CANNOT REDO, NOT ENOUGH STATES IN STACK\n";
                             std::cout<<"ILLEGAL\n";
+							send(client, "ILLEGAL\n", 8, 0);
                             continue;
                         }
                         continue;
                     }
-                    else if(input=="SHOW_NEXT_POS"){
-                        showPossibleMoves();
+                    //else if(input=="SHOW_NEXT_POS"){
+					else if( strncmp(input.c_str(), "SHOW_NEXT_POS", 13) == 0) {;
+                        showPossibleMoves(client);
                         continue;
                     }
-                    else if(input=="RAND" || input=="R"){
+                    //else if(input=="RAND" || input=="R"){
+					else if( strncmp(input.c_str(), "RAND", 4) == 0 || strncmp(input.c_str(), "R", 1) == 0 ) {
                         moveRandomly();
                     }
                     else{
                         std::cout << "ILLEGAL\n";
+						send(client, "ILLEGAL\n", 8, 0);
                         continue;
                     }
                 }
                 if(isValidCoordinate){
                    //Valid coordinate was entered
                     if(displayOn){
-                        std::cout<<"Human Plays :"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
+                        std::cout<<"Human Plays @:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
+						
+						ostringstream osCoordinates;
+											
+						osCoordinates << char('A'+coordinate.first)<<coordinate.second+1;
+						
+						std::string message = "Human Plays @:" + osCoordinates.str() + '\n';
+						
+						send(client, message.c_str(), message.size(), 0);
+						
                     }
                 }
             }//End Human Input
@@ -522,6 +694,7 @@ int handleGameInput(int client){
         //Check that move is valid for Current Player.
         if (game.IsValidMove(coordinate.first, coordinate.second, CurrentPlayer) == false){
             std::cout << "ILLEGAL\n";
+			send(client, "ILLEGAL\n", 8, 0);
             continue; 
         }
 
@@ -530,92 +703,70 @@ int handleGameInput(int client){
 
         //Switch Player's turns
         CurrentPlayer=GetOtherPlayer(CurrentPlayer); 
-        if(displayOn){std::cout<<"-------------------\n";}
+        if(displayOn){std::cout<<"-------------------\n\n"; send(client, "-------------------\n\n", 21, 0);}
     }
     return 1;
 }
 
+class gameStart {
+
+public:
+
 //Handles user input and display of data 
-int api(std::string commandLine,int client){
+	int api(std::string commandLine,int client){
 		for(int i=0;i<40;i++)std::cout<<"\n";
 		std::cout<< "WELCOME\n";
-	while(1){
+		send(client, "WELCOME\n", 8, 0);
+		while(1){
 
-		if(!handlePregameInput(client)){return 0;}
+			if(!handlePregameInput(client)){return 0;}
 	
-		std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
-		std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
-		if(!handleGameInput(client))
-			return 0;
-		std::cout << "Press ENTER to continue.  Use the EXIT command at any time to quit.";
-		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		game.SetBoard(newBoard.GetBoard());
+			std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
+			std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
+			
+			ostringstream ssPlayer1;
+			ostringstream ssPlayer2;
+			std::string infoPlayer1;
+			std::string infoPlayer2;
+			
+			if(PlayerIsAI(player1)) {
+				ssPlayer1 << player1;
+				infoPlayer1 = "Player1: AI\t:" + ssPlayer1.str() + ": BLACK\n";
+			} else {
+				ssPlayer1 << player1;
+				infoPlayer1 = "Player1: Human\t:" + ssPlayer1.str() + ": BLACK\n";
+			}
+		
+			if(PlayerIsAI(player2)) {
+				ssPlayer2 << player2;
+				infoPlayer2 = "Player2: AI\t:" + ssPlayer2.str() + ": WHITE\n";
+			} else {
+				ssPlayer2 << player2;
+				infoPlayer2 = "Player2: Human\t:" + ssPlayer2.str() + ": WHITE\n";
+			}
+		
+			send(client, infoPlayer1.c_str(), infoPlayer1.size(), 0);
+			send(client, infoPlayer2.c_str(), infoPlayer2.size(), 0);
+			
+			if(!handleGameInput(client))
+				return 0;
+			std::cout << "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.";
+			send(client, "Press ENTER to quit to continue.  Use the EXIT command a any time to quit.\n", 75, 0);
+						
+			std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			game.SetBoard(newBoard.GetBoard());
+			//return 0;
+		}
+		return 0;
 	}
-	return 0;
-}
+};
 
-int main ( int argc, char *argv[] ){
-	if(argc>3){
-		// argc should be 1, 2, or 3 for correct execution
-		// We print argv[0] assuming it is the program name
-		cout<<"usage: "<< argv[0] <<" (<ExecutionCount>) (<SearchDepth>)\n";
-		return -1;
-	}
-	else{
-		if(argc==1){
-			//no args provided, use default vals (exeCount=1,MaxDepth=4)
-		}
-		else if(argc>=2){
-			//We assume argv[1] is an integer representing the number of executions to run
-			char * endptr=NULL;
-			int exeC = strtol(argv[1], &endptr, 10);
-			if(endptr==NULL){
-				/* the whole string is garbage - no numbers extracted */
-				cerr<<"Error in command arguments while processing <ExecutionCount>. Must be integer\n";
-				return -1;
-			}
-			else if(*endptr==0){
-				/* the whole string was a number - yay! */
-				//totalExecutions = exeC;
-			}
-			else{
-				/* strtol extracted a number from the string, but stopped at some invalid character
-				   that you can check by looking at the value of endptr */
-				   cerr<<"Error in command arguments while processing <ExecutionCount>. Invalid Character: "<<endptr<<"\n";
-				   return -1;
-			}
-		}
-		if(argc==3){
-			//We assume argv[2] is an integer representing the Search Depth to use for AI
-			char * endptr=NULL;
-			int dpth = strtol(argv[2], &endptr, 10);
-			if(endptr==NULL){
-				/* the whole string is garbage - no numbers extracted */
-				cerr<<"Error in command arguments while processing <SearchDepth>. Must be integer\n";
-				return -1;
-			}
-			else if(*endptr==0){
-				/* the whole string was a number - yay! */
-				maxDepth = dpth;
-			}
-			else{
-				/* strtol extracted a number from the string, but stopped at some invalid character
-				   that you can check by looking at the value of endptr */
-				   cerr<<"Error in command arguments while processing <SearchDepth>. Invalid Character: "<<endptr<<"\n";
-				   return -1;
-			}
-		}
-	}
-	int client=0;//temp value until implemented with server
-	api("START",client);
-	return 0;
-}
 
 /**      HARD-AI      **/
 /* Developed by Cutris */
 
 //uses a health-number for the different parts of the board to determine a moves strength
-int heuristicWeightZ(Reversi childBoard, int x, int y, Square moveOwner, int depth){
+int heuristicWeight(Reversi childBoard, int x, int y, Square moveOwner, int depth){
 	int cummulative=0;
 	//got a corner
 	if(	(x==0&&y==0)||//top left
@@ -662,111 +813,6 @@ int heuristicWeightZ(Reversi childBoard, int x, int y, Square moveOwner, int dep
 	return cummulative;
 }
 
-//experimental version
-int heuristicWeightY(Reversi childBoard, int x, int y, Square moveOwner, int depth){
-	int cummulative=0;
-	//got a corner
-	if(	(x==0&&y==0)||//top left
-		(x==boardSize-1&&y==boardSize-1)||//bottom right
-		(x==0&&y==boardSize-1)||//bottom left
-		(x==boardSize-1&&y==0)){ //top right
-		if(moveOwner==CurrentPlayer)
-			return  10000/(depth+1);//45,19@5000&10k&11k&15k
-		else
-			return -10000/(depth+1);//45,19@-5000&-10k&-11k&-15k
-	}
-	//edge next to empty corner
-	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==empty)||
-		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==empty)||
-		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==empty)||
-		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==empty)){
-			if(moveOwner==CurrentPlayer)
-				return -5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
-			else
-				return 5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
-	}
-	//safe edge next to corner
-	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==moveOwner)||
-		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==moveOwner)||
-		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==moveOwner)||
-		(((x==6&&y==7)||(x==7&&y==6))&&childBoard.GetSquare(7,7)==moveOwner)){
-			if(moveOwner==CurrentPlayer)
-				return 5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
-			else
-				return -5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
-	}
-	//sweet-sixteen corner
-	if( ((x==2&&y==2)&&childBoard.GetSquare(0,0)==empty)||
-		((x==2&&y==5)&&childBoard.GetSquare(0,7)==empty)||
-		((x==5&&y==2)&&childBoard.GetSquare(7,0)==empty)||
-		((x==5&&y==5)&&childBoard.GetSquare(7,7)==empty) ){
-			if(moveOwner==CurrentPlayer)
-				return 2500/(depth+1);
-			else
-				return -2500/(depth+1);
-	}
-	//deadman's corner
-	if( ((x==1&&y==1)&&childBoard.GetSquare(0,0)==empty)||
-		((x==1&&y==6)&&childBoard.GetSquare(0,7)==empty)||
-		((x==6&&y==1)&&childBoard.GetSquare(7,0)==empty)||
-		((x==6&&y==6)&&childBoard.GetSquare(7,7)==empty) ){
-			if(moveOwner==CurrentPlayer)
-				return -5000/(depth+1);
-			else
-				return 5000/(depth+1);
-	}
-	//got an edge, blocking a straightaway
-	if( (x==0&&(y<boardSize-3&&y>2))&&
-		childBoard.GetSquare(x+1,y)==GetOtherPlayer(moveOwner))
-		if(moveOwner==CurrentPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (x==boardSize-1&&(y<boardSize-3&&y>2))&&
-		childBoard.GetSquare(x-1,y)==GetOtherPlayer(moveOwner))
-		if(moveOwner==CurrentPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (y==0&&(x<boardSize-3&&x>2))&&
-		childBoard.GetSquare(x,y+1)==GetOtherPlayer(moveOwner))
-		if(moveOwner==CurrentPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (y==boardSize-1&&(x<boardSize-3&&x>2))&&
-		childBoard.GetSquare(x,y-1)==GetOtherPlayer(moveOwner))
-		if(moveOwner==CurrentPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( x==0||//left edge
-		x==boardSize-1||//right edge
-		y==0||//top edge
-		y==boardSize-1){//bottom edge
-		if(moveOwner==CurrentPlayer)
-			cummulative+= 750/(depth+1);
-		else
-			cummulative-= 750/(depth+1);
-	}
-	//avoid these
-	if( x==1||x==boardSize-2){
-		if(moveOwner==CurrentPlayer)
-			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
-		else
-			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
-	}
-	if( y==1||y==boardSize-2){
-		if(moveOwner==CurrentPlayer)
-			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
-		else
-			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
-	}
-
-	return cummulative;
-}
-
-
 //simply checks to see if the passed board is "game-over"
 int endGameEvaluator(Reversi childBoard){
 	Square opponent;
@@ -778,9 +824,9 @@ int endGameEvaluator(Reversi childBoard){
 			else
 				opponent=player1;
 			if(childBoard.Count(CurrentPlayer)>childBoard.Count(opponent))
-				return childBoard.Count(CurrentPlayer)*10000;
+				return 10000;
 			else
-				return childBoard.Count(opponent)*(-10000);
+				return -10000;
 	}
 	return 0;
 }
@@ -796,6 +842,11 @@ int numOfAvailableMovesEvaluator(Reversi childBoard,Square forecastPlayer){
 		else
 			return -10000;
 	}
+	else
+		if(CurrentPlayer==forecastPlayer)
+			return (-10)*childBoard.GetValidMoves(nextPlayer).size();
+		else
+			return (10)*childBoard.GetValidMoves(nextPlayer).size();
 	return 0;
 
 }
@@ -826,7 +877,7 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		//forecastedMoveWeights is private to this move
 		//and will be replaced when we itterate to the next
 		//move of this stage
-		forecastedMoveWeight+=heuristicWeightZ(	childBoard,
+		forecastedMoveWeight+=heuristicWeight(	childBoard,
 												vals[possibleMove].first,
 												vals[possibleMove].second,
 												forecastPlayer, depth);
@@ -838,17 +889,16 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
 		if(	depth<maxDepth&&//if not at our maximum allowed recursion
-			heuristicWeightZ(childBoard,//here we say that we don't want to bother
+			heuristicWeight(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
 							forecastPlayer, depth)!=-10000){//opponent taking a corner 
 				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
 				forecastedMoveWeight+=checkForWeightZ(childBoard,nextPlayer,depth+1);
 		}
-/*		else{
+		else{
 			return childBoard.Count(CurrentPlayer)*100+endGameEvaluator(childBoard);
-		}*///found the final board at this depth is not evaluated for each possible move
-
+		}
 		//keep track of which move is the best at this stage of the branch
 		//MaxMoveWeight is private to this stage of the branch
 		//and will be returned as the maximum possible move weight
@@ -864,97 +914,13 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 			break;
 		
 	}
-	return MaxMoveWeight+vals.size();//decided to add the num of avail
-}
-
-//experimental version
-int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
-	//MaxMoveWeight is private to this branch of the tree
-	//but publicly used to the childBoards (leaf-nodes)
-	int MaxMoveWeight=-99999;
-
-	std::vector< std::pair<int,int> >vals=parentBoard.GetValidMoves(forecastPlayer);
-	std::vector<int> weights;	
-//	if(!endGameEvaluator(parentBoard))
-//		return endGameEvaluator(parentBoard);
-	if(endGameEvaluator(parentBoard)!=0)
-			return endGameEvaluator(parentBoard);
-
-	//here we itterate through the moves, creating a private object for each
-	//move that contains some private variables and a private boardState that
-	//records the addition of the new move to the parentBoard that was passed in
-	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){
-		int forecastedMoveWeight=0;
-		Square nextPlayer;
-
-		//this childBoard is private to this particular move
-		//and will record this move as a new state of the board
-		//to be passed recursively for examination of new moves
-		//that will be available after this move.
-		Reversi childBoard(boardSize);				
-		childBoard.SetBoard(parentBoard.GetBoard());
-
-		//evaluate and assign a weight to this move
-		//forecastedMoveWeights is private to this move
-		//and will be replaced when we itterate to the next
-		//move of this stage
-		forecastedMoveWeight+=heuristicWeightY(	childBoard,
-												vals[possibleMove].first,
-												vals[possibleMove].second,
-												forecastPlayer, depth);
-
-		//now add the move to this private board
-		childBoard.DoMove(	vals[possibleMove].first,
-							vals[possibleMove].second,
-							forecastPlayer);
-		if(numOfAvailableMovesEvaluator(childBoard,forecastPlayer)!=0)
-			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
-		//we will pass a copy of this board recursively
-		//here, we attempt to only recurse if necessary 
-		if(	depth<testMaxDepth&&//if not at our maximum allowed recursion
-			heuristicWeightY(childBoard,//here we say that we don't want to bother
-							vals[possibleMove].first,//checking further down this move's
-							vals[possibleMove].second,//lineage if it involves the
-							forecastPlayer, depth)!=-10000/(depth+1)){//opponent taking a corner 
-				nextPlayer = (forecastPlayer == player1 ? player2 : player1);
-				forecastedMoveWeight+=checkForWeightY(childBoard,nextPlayer,depth+1);
-
-					
-		}
-/*		else{
-			return childBoard.Count(CurrentPlayer)*100+endGameEvaluator(childBoard);
-		}*///found the final board at this depth is not evaluated for each possible move
-
-		//keep track of which move is the best at this stage of the branch
-		//MaxMoveWeight is private to this stage of the branch
-		//and will be returned as the maximum possible move weight
-		if(forecastedMoveWeight>MaxMoveWeight)
-			MaxMoveWeight=forecastedMoveWeight;	
-		//stop itterating through the for loop looking at the next available
-		//move, if we have already found a great move (alpha-beta, pruning)
-		//we use a different acceptable weight at the beginning of the game.
-		if(childBoard.Count(empty)>53){
-			if(MaxMoveWeight>500*testMaxDepth)
-				break;
-		}else if(MaxMoveWeight>900*testMaxDepth)
-			break;
-/*		weights.push_back(forecastedMoveWeight);
-		if(weights.size()==vals.size())
-			std::cout<<possibleMove+1;*/
-		
-	}
-/*	if(vals.size()==0&&parentBoard.Count(empty)>4)
-		return MaxMoveWeight;
-	else if(vals.size()==0&&parentBoard.Count(empty)>0)
-		return -10000;
-	else*/
-		return MaxMoveWeight+vals.size()*100;//decided to add the num of avail
+	return MaxMoveWeight;
 }
 
 //takes the game board and creates a tree of moves, passing a game board with
 //each immediately available move, to checkForWeightz
-std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth){
-	int maxMoveWeight=-99999,immediatePlusForecastWeights=0,maxPossibleMove=0;
+std::pair<int,int> findBestMove(Square forecastPlayer,int depth){
+	int maxMoveWeight=-99999,immediatePlusForecastWeights=-99999,maxPossibleMove=0;
 	Square nextPlayer;
 	//vals will hold the possible moves for the player we want to forcast at this depth
 	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);
@@ -967,7 +933,7 @@ std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth){
 		boardForAPrimaryMove.DoMove(vals[possibleMove].first,
 									vals[possibleMove].second,
 									forecastPlayer);
-		immediateMoveWeights+=heuristicWeightZ(	boardForAPrimaryMove,
+		immediateMoveWeights+=heuristicWeight(	boardForAPrimaryMove,
 										vals[possibleMove].first,
 										vals[possibleMove].second,
 										forecastPlayer, depth);
@@ -983,43 +949,3 @@ std::pair<int,int> findBestMoveZ(Square forecastPlayer,int depth){
 
 }
 
-//experimental version
-std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth){
-	srand ( time(NULL) );
-	int maxMoveWeight=-99999,immediatePlusForecastWeights=0,maxPossibleMove=0;
-	Square nextPlayer;
-	std::vector< std::pair<int,int> >movesTiedForTop;
-	std::vector<int> weights;
-	//vals will hold the possible moves for the player we want to forcast at this depth
-	std::vector< std::pair<int,int> >vals=game.GetValidMoves(forecastPlayer);
-	for(int possibleMove=0;possibleMove<vals.size();possibleMove++){	
-		int immediateMoveWeights=0;
-		Reversi boardForAPrimaryMove(boardSize);
-		//new board (branch to tree) for each possibleMove created each itteration
-		boardForAPrimaryMove.SetBoard(game.GetBoard());
-		//add this possible move to its board
-		boardForAPrimaryMove.DoMove(vals[possibleMove].first,
-									vals[possibleMove].second,
-									forecastPlayer);
-		immediateMoveWeights+=heuristicWeightY(	boardForAPrimaryMove,
-										vals[possibleMove].first,
-										vals[possibleMove].second,
-										forecastPlayer, depth);
-		nextPlayer = (forecastPlayer == player1 ? player2 : player1);//figure out who is the next player
-		immediateMoveWeights+=checkForWeightY(boardForAPrimaryMove,nextPlayer,1);//the maximum outcome from the set Depth (checkForWeightZ())
-		if(immediateMoveWeights>maxMoveWeight){	//if this possible Move's maximum outcome is bigger
-//			if(movesTiedForTop.size()>0)
-//				movesTiedForTop.clear();
-//			movesTiedForTop.push_back(vals[possibleMove]);
-			maxMoveWeight=immediateMoveWeights;	//keep it as the new maximum overall
-			maxPossibleMove=possibleMove;	//and remember which move that maximum belongs to
-		}//else if(immediatePlusForecastWeights==maxMoveWeight){
-//			movesTiedForTop.push_back(vals[possibleMove]);
-//		}
-		weights.push_back(immediateMoveWeights);
-	}
-	std::cout<<"Value of this move:"<<maxMoveWeight<<std::endl;
-//	int randomOfTheTopMoves = rand() % movesTiedForTop.size();
-	return vals[maxPossibleMove];//when done checking down each branch of possible Moves send the best move back
-
-}
