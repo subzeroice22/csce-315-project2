@@ -496,8 +496,8 @@ int handleGameInput(int client){
 				std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
 				stringstream ss;
 				std::cout<< "The game has ended after "<<MoveCount<<" moves!\n"
-						<<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
-						<<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
+						<<"Player1 ("<<p1Name<<")["<<player1<<RESET<<"] conquered "<<n1<<" squares.\n"
+						<<"Player2 ("<<p2Name<<")["<<player2<<RESET<<"] conquered "<<n2<<" squares.\n";
 				if(n1==n2){
 					PrintOut("It's a Draw!\n",client);
 					send(client, "The game has ended\n", 19, 0);
