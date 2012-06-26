@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\console.cpp" />
     <ClCompile Include="..\..\UnitReversi.cpp" />
   </ItemGroup>
   <ItemGroup>
