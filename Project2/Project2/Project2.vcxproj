@@ -12,11 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\UnitReversi.cpp" />
-    <ClCompile Include="..\..\UnitReversiMain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\alphaBetaAI.h" />
     <ClInclude Include="..\..\UnitReversi.h" />
+    <ClInclude Include="..\..\UnitReversiMain.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{38C3DFD8-43E5-470C-979A-BD0F21937F67}</ProjectGuid>
