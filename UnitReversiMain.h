@@ -168,7 +168,7 @@ void PrintOut(std::string inString,int client){
 		std::cout<<inString;
 	}
 
-//	delete [] charToSend;
+	delete [] charToSend;
 }
 
 //Breaks up the coordinate input for an x and y value
@@ -303,93 +303,102 @@ int handlePregameInput(int client){
 	while(1){
 	
 		const std::string input = GetInput(client);
-		//if(input=="EXIT"){
+
 		if( strncmp(input.c_str(), "EXIT", 4) == 0) {
 			return 0;
 		}
-		//else if(input=="DISPLAY_ON" ){
+
 		else if( strncmp(input.c_str(), "DISPLAY_ON", 10) == 0) {
 			displayOn = true;
 			std::cout<<"OK\n";
 			send(client, "OK\n", 3, 0);
 			break;
 		}
-		//else if(input=="DISPLAY_OFF"){
+
 		else if( strncmp(input.c_str(), "DISPLAY_OFF", 11) == 0) {
 			displayOn = false;
 			std::cout<<"OK\n";
 			send(client, "OK\n", 3, 0);
 			break;
 		}
-		//else if(input=="BLACK"){
-		else if( strncmp(input.c_str(), "BLACK", 5) == 0) {
-		    AIlevelP2=AIlevelP1;
-		    AIlevelP1="OFF";
-		}
-		//else if(input=="TEST_HARD"){
-		else if( strncmp(input.c_str(), "TEST_HARD", 9) == 0) {
-			AIlevelP1="HARD";
-			AIlevelP2="HARD";
-			std::cout<<"HARD V HARD\n";
-			send(client, "HARD V HARD\n", 12, 0);
-		}
-		//else if(input=="TEST_MEDIUM"){
-		else if( strncmp(input.c_str(), "TEST_MEDIUM", 11) == 0) {
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			std::cout<<"HARD V MEDIUM\n";
-			send(client, "HARD V MEDIUM\n", 14, 0);
-		}
-		//else if(input=="MEDIUM"){
-		else if( strncmp(input.c_str(), "MEDIUM", 6) == 0) {
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			std::cout<<"HARD V MEDIUM\n";
-			send(client, "HARD V MEDIUM\n", 14, 0);
-		}
-		//else if(input=="TEST_EASY"){
-		else if( strncmp(input.c_str(), "TEST_EASY", 9) == 0) {
-			AIlevelP1="HARD";
-			AIlevelP2="EASY";
-			std::cout<<"HARD V EASY\n";
-			send(client, "HARD V EASY\n", 12, 0);
-		}
-		//else if(input=="BLACK"){
+		
 		else if( strncmp(input.c_str(), "BLACK", 5) == 0) {
 			AIlevelP2=AIlevelP1;
 		    AIlevelP1="OFF";
 			std::cout<<"BLACK\n";
 			send(client, "BLACK\n", 6, 0);
 		}
-		//else if(input=="WHITE"){
+
 		else if( strncmp(input.c_str(), "WHITE", 5) == 0) {
 		    AIlevelP1=AIlevelP2;
 		    AIlevelP2="OFF";
 			std::cout<<"WHITE\n";
 			send(client, "WHITE\n", 6, 0);
 		}
-		//else if(input=="NO_AI"){
+		
+		else if( strncmp(input.c_str(), "HARD_V_HARD", 11) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="HARD";
+			std::cout<<"HARD V HARD\n";
+			send(client, "HARD V HARD\n", 12, 0);
+		}
+
+		else if( strncmp(input.c_str(), "HARD_V_MEDIUM", 13) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="MEDIUM";
+			std::cout<<"HARD V MEDIUM\n";
+			send(client, "HARD V MEDIUM\n", 14, 0);
+		}
+		
+		else if( strncmp(input.c_str(), "HARD_V_EASY", 11) == 0) {
+			AIlevelP1="HARD";
+			AIlevelP2="EASY";
+			std::cout<<"HARD V EASY\n";
+			send(client, "HARD V EASY\n", 12, 0);
+		}
+		
+		else if( strncmp(input.c_str(), "MEDIUM_V_MEDIUM", 15) == 0) {
+				AIlevelP1="MEDIUM";
+				AIlevelP2="MEDIUM";
+				std::cout<<"MEDIUM V MEDIUM\n";
+				send(client, "MEDIUM V MEDIUM\n", 16, 0);			
+		}
+		
+		else if( strncmp(input.c_str(), "MEDIUM_V_EASY", 13) == 0) {
+			AIlevelP1="MEDIUM";
+			AIlevelP2="EASY";
+			std::cout<<"MEDIUM V EASY\n";
+			send(client, "MEDIUM V EASY\n", 14, 0);
+		}
+		
+		else if( strncmp(input.c_str(), "EASY_V_EASY", 11) == 0) {
+			AIlevelP1="EASY";
+			AIlevelP2="EASY";
+			std::cout<<"EASY V EASY\n";
+			send(client, "EASY v EASY\n", 12, 0);		
+		}
+			
 		else if( strncmp(input.c_str(), "NO_AI", 5) == 0) {
 		    AIlevelP1="OFF";
 		    AIlevelP2="OFF";
 		    std::cout<<"OK\n";
 			send(client, "OK\n", 3, 0);
 		}
-		//else if(input=="EASY"){
+		
 		else if( strncmp(input.c_str(), "EASY", 4) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="EASY";
 			std::cout<<"OK\n";
 			send(client, "OK\n", 3, 0);
 		}
-		//else if(input=="MEDIUM"){
+		
 		else if( strncmp(input.c_str(), "MEDIUM", 6) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="MEDIUM";
 			std::cout<<"OK\n";
 			send(client, "OK\n", 3, 0);
 		}
-		//else if(input=="HARD"){
+		
 		else if( strncmp(input.c_str(), "HARD", 4) == 0) {
 		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
 		    AIlevel(aiPlayer) ="HARD";
@@ -467,157 +476,7 @@ int handlePregameInput(int client){
 			if( strncmp(input.c_str(), "?", 1) != 0) {std::cout<<"ILLEGAL\n"; send(client, "ILLEGAL\n", 8, 0);}
 			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n"; //TODO: Add more..
 			send(client, "WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n", 51, 0);
-		}
-	
-		/*
-		std::string input = GetInput(client);
-		if(input=="EXIT"){
-			return 0;
-		}
-
-		else if(input=="TEST_HARD"){
-			AIlevelP1="HARD";
-			AIlevelP2="HARD";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V HARD\n";
-		}
-		else if(input=="TEST_MEDIUM"){
-			AIlevelP1="HARD";
-			AIlevelP2="MEDIUM";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V MEDIUM\n";
-		}
-		else if(input=="TEST_EASY"){
-			AIlevelP1="HARD";
-			AIlevelP2="EASY";
-			input=GetInput(client);
-			if(isdigit(input[0]))
-				totalExecutions=atoi(input.c_str());
-			std::cout<<"HARD V EASY\n";
-		}
-		else if(input=="DISPLAY_ON" ){
-			displayOn = true;
-			std::cout<<"OK\n";
-			break;
-		}
-		else if(input=="DISPLAY_OFF"){
-			displayOn = false;
-			std::cout<<"OK\n";
-			break;
-		}
-		else if(input=="BLACK"){
-		    AIlevelP2=AIlevelP1;
-		    AIlevelP1="OFF";
-		}
-		else if(input=="BLACK"){
-			AIlevelP2=AIlevelP1;
-		    AIlevelP1="OFF";
-			std::cout<<"BLACK\n";
-		}
-		else if(input=="WHITE"){
-		    AIlevelP1=AIlevelP2;
-		    AIlevelP2="OFF";
-			std::cout<<"WHITE\n";
-		}
-		else if(input=="NO_AI"){
-		    AIlevelP1="OFF";
-		    AIlevelP2="OFF";
-		    std::cout<<"OK\n";
-		}
-		else if(input=="EASY"){
-		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
-		    AIlevel(aiPlayer) ="EASY";
-			std::cout<<"OK\n";
-		}
-		else if(input=="MEDIUM"){
-		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
-		    AIlevel(aiPlayer) ="MEDIUM";
-			std::cout<<"OK\n";
-		}
-		else if(input=="HARD"){
-		    Square aiPlayer = ((PlayerIsAI(player2))?(player2):(player1));
-		    AIlevel(aiPlayer) ="HARD";
-			std::cout<<"OK\n";
-		}*/
-/*		else if(input[0]=='P'){
-		    if(input[1]=='1'){
-		        AIlevelP1=input.substr(2);
-                std::cout<<"OK\n";
-		    }
-		    else if(input[1]=='2'){
-		        AIlevelP2=input.substr(2);
-                std::cout<<"OK\n";
-		    }
-		    else{std::cout<<"ILLEGAL\n";}
-		}
-		else if(input=="4X4"){
-			std::cout<<"OK\n";
-			boardSize=4;
-		}
-
-		else if(input=="8X8"){
-			std::cout<<"OK\n";
-			boardSize=8;
-		}
-		else if(input=="6"){
-		    AIlevelP1="MEDIUM";
-		    AIlevelP2="OFF";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:HARD-AI, P2:Human\n";
-		    displayOn=true;
-			break;
-		}
-		else if(input=="7"){
-		    AIlevelP2="PRUNE";
-		    AIlevelP1="OFF";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:Human, P2:PRUNE-AI\n";
-		    displayOn=true;
-			break;
-		}
-		else if(input=="8"){
-		    AIlevelP2="PRUNE";
-		    AIlevelP1="MEDIUM";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:MEDIUM, P2:PRUNE-AI\n";
-		    displayOn=true;
-			break;
-		}
-		else if(input=="9"){
-		    AIlevelP2="PRUNE";
-		    AIlevelP1="HARD";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:HARD, P2:PRUNE-AI\n";
-		    displayOn=true;
-			break;
-		}*///commented all of this out while testing totalExecutions input
-		/*else if(input=="8"){
-		    AIlevelP1="MEDIUM";
-		    AIlevelP2="HARD";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:"<<AIlevelP1<<"-AI, P2:"<<AIlevelP2<<"-AI\n";
-		    displayOn=true;
-			break;
-		}*//*
-		else if(input=="88"){
-		    AIlevelP1="MEDIUM_DEBG";
-		    AIlevelP2="HARD";
-		    std::cout<<"OK\n";
-			std::cout<<"P1:"<<AIlevelP1<<"-AI, P2:"<<AIlevelP2<<"-AI\n";
-		    displayOn=true;
-			break;
-		}
-		else{
-		    if(input!="?"){std::cout<<"ILLEGAL\n";}
-			std::cout<<"WHITE, BLACK, EASY, MEDIUM, HARD, DISPLAY_ON, EXIT\n"; //TODO: Add more..
-		}
-		*/
-		
-		
+		}		
 	}
 	return 1;
 }
@@ -714,7 +573,7 @@ int handleGameInput(int client){
 						whiteWins++;
 				
 					stringstream ss;
-					ss << std::cout<< "The game has ended after "<<MoveCount<<" moves!\n";
+					ss << "The game has ended after "<<MoveCount<<" moves!\n";
 					
 					send(client, ss.str().c_str(), ss.str().size(), 0);
 			
@@ -809,6 +668,7 @@ int handleGameInput(int client){
                 }
 				*/
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
+					maxDepth=2;
 					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
 
