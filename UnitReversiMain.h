@@ -798,7 +798,7 @@ int handleGameInput(int client){
                     moveRandomly();
                 }
 				else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-					AlphaBetaAI ai(game, CurrentPlayer, maxDepth);
+					AlphaBetaAI ai(game, CurrentPlayer, 3);
 					coordinate = ai.findMax();
 				}
 				/*
@@ -1386,7 +1386,7 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
-		if(	depth<testMaxDepth&&//if not at our maximum allowed recursion
+		if(	depth<maxDepth&&//if not at our maximum allowed recursion
 			heuristicWeightY(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
@@ -1409,9 +1409,9 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
 		if(childBoard.Count(empty)>53){
-			if(MaxMoveWeight>500*testMaxDepth)
+			if(MaxMoveWeight>500*maxDepth)
 				break;
-		}else if(MaxMoveWeight>900*testMaxDepth)
+		}else if(MaxMoveWeight>900*maxDepth)
 			break;
 /*		weights.push_back(forecastedMoveWeight);
 		if(weights.size()==vals.size())
