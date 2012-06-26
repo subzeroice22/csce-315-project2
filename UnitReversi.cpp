@@ -5,17 +5,12 @@
 	Richel Bilderbeek 
 	http://www.richelbilderbeek.nl/GameReversiConsoleSource_1_0.htm
 ---------------------------------------------------------------------------*/
-//#pragma hdrstop 
 
 #include "UnitReversi.h" 
-//--------------------------------------------------------------------------- 
 #include <cassert> 
-/*--------------------------------------------------------------------------- 
-Primary board constructor
----------------------------------------------------------------------------*/
+
 Reversi::Reversi(const int size) 
-  : mBoard(size,std::vector<Square>(size,empty)) 
-{ 
+  : mBoard(size,std::vector<Square>(size,empty)){ 
   assert( size > 0); 
   assert( mBoard.size() == mBoard[0].size() ); 
 
@@ -26,19 +21,20 @@ Reversi::Reversi(const int size)
   SetSquare(x  ,y+1,player2); 
   SetSquare(x+1,y+1,player1); 
 } 
-/*--------------------------------------------------------------------------- 
-Unknown??????????????????
----------------------------------------------------------------------------*/ 
+
 const std::vector<std::vector<Square> >& Reversi::GetBoard() const { 
   return mBoard; 
 }
+
 void Reversi::SetBoard(std::vector<std::vector<Square> > newBoard){
 	mBoard = newBoard;
 }
+
 //Returns type Square, containING char empty, player1,or player2 at xy coord
 const Square Reversi::GetSquare(const int x, const int y) const { 
   return GetSquareXy(mBoard,x,y); 
 } 
+
 //Simply sets square with player's move (ie sets to player1 or player2)
 void Reversi::SetSquare(const int x, const int y, const Square player) { 
   assert(player != empty); //terminates program if player is NULL
@@ -51,7 +47,8 @@ void Reversi::SetSquare(const int x, const int y, const Square player) {
  void Reversi::setSize(const int newSize){
 	 int size = newSize;
  }
-//Perfoms a reverse of the last two moves
+
+ //Perfoms a reverse of the last two moves (plys)
 const bool Reversi::DoUndo(){
     if(boardHistory.size()<2) return false;
     //boardRedos.push(new std::vector< std::vector< Square > >(mBoard) );
@@ -64,7 +61,8 @@ const bool Reversi::DoUndo(){
 	boardHistory.pop();
     return true;
 }
-//restores two moves that had been reversed
+
+//restores two moves (plys) that had been reversed
 const bool Reversi::DoRedo(){
     if(boardRedos.size()<2) return false;
     //boardHistory.push(new std::vector< std::vector<Square> >(mBoard));
@@ -79,6 +77,7 @@ const bool Reversi::DoRedo(){
 	
 	
 }
+
 //Checks IsValidMove and then  
 void Reversi::DoMove(const int x, const int y, const Square player) { 
   assert(IsValidMove(x,y,player)==true || "Invalid move!"); 
@@ -334,8 +333,5 @@ const Square GetSquareXy(const std::vector<std::vector<Square> >& board,const in
   assert(y < size); 
   return board[y][x]; 
 } 
-
-
-//#pragma package(smart_init)
 
 

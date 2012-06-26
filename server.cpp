@@ -10,7 +10,6 @@
 using namespace std;
 
 //Server
-
 int main() {
 
 	int server_portno;
@@ -28,7 +27,6 @@ int main() {
 		exit(1);
 	}	
 
-	//bzero((char*) &server_address, sizeof(server_address));
 	memset(&server_address, 0, sizeof(server_address));
 	server_portno = 5000;
 	server_address.sin_family = AF_INET;
@@ -51,7 +49,6 @@ int main() {
 		exit(1);
 	}
 	client_length = sizeof(client_address);
-
 	cout << "Server socket:\t" << sock << '\n';
 	
 	//accept connections	
@@ -60,7 +57,6 @@ int main() {
 	
 	gameStart reversi;
 	reversi.api("START", client_sock);
-	//reversi.api("START", 0);
 	
 	//close the client's connection
 	close(client_sock);
