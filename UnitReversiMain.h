@@ -706,8 +706,10 @@ int handleGameInput(int client){
 					else
 						whiteWins++;
 				
+					stringstream ss;
+					ss << std::cout<< "The game has ended after "<<MoveCount<<" moves!\n";
 					
-					send(client, "The game has ended\n", 19, 0);
+					send(client, ss.str().c_str(), ss.str().size(), 0);
 			
 					ostringstream osP1Name;
 					ostringstream osP2Name;
