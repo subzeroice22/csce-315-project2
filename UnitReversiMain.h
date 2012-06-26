@@ -25,7 +25,7 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,isHuman,maxDepth=2,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
+int boardSize=8,randomMove,maxDepth=2,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
