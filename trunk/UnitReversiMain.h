@@ -121,15 +121,22 @@ const bool IsInt(const std::string& s, int& rInt)
 } 
 
 const std::string GetInput(int client) {
-	char input[30];
-	std::string s = "";
-	recv(client, input, 30, 0);
+	if(client != 0) {
+		char input[30];
+		std::string s = "";
+		recv(client, input, 30, 0);
 	
-	for(int i = 0; input[i] != '\n'; i++) {
-		s = s + input[i];
+		for(int i = 0; input[i] != '\n'; i++) {
+			s = s + input[i];
+		}
+	
+		return s;
+	} else {
+		string input;
+		std::cin >> input;
+		return input;
 	}
 	
-	return s;
 }
 
 //Handles all input and drops the newline char.  Either recv or getlines.
@@ -189,7 +196,7 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
 
 //Up front determination whether the users coordinate is a valid input type 
 const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate){
-    if(input.size()!=3) return false;
+    if((input.size()!=3 && server) || (input.size()!=2 && !server)) return false;
 	//TODO: need error (bounds) checking on x and y
     int x, y;
     x = input[0] - 'A';
@@ -955,6 +962,11 @@ public:
 
 //Handles user input and display of data 
 	int api(std::string commandLine,int client){
+		if(client <= 0) {
+			server = false;
+		} else {
+			server = true;
+		}
 		for(int i=0;i<40;i++)std::cout<<"\n";
 		std::cout<< "WELCOME\n";
 		send(client, "WELCOME\n", 8, 0);
