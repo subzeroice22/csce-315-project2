@@ -20,8 +20,7 @@
 #include <time.h>//for seeding srand()
 #include <limits>//maxlimit used in cin.ignore.get pause
 #include <cctype>//for upper to lower
-#include "UnitReversi.h"//#includes <vector>
-//#include <WinSock2.h>
+#include "UnitReversi.h"
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
@@ -109,8 +108,7 @@ std::ostream& operator<<(std::ostream& os, const Reversi& r) {
 } 
 
 //Returns true if the string can be converted to integers
-const bool IsInt(const std::string& s, int& rInt) 
-{ 
+const bool IsInt(const std::string& s, int& rInt){ 
   std::istringstream i(s); 
   if (!(i >> rInt)) 
   { 
@@ -207,31 +205,6 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
 } 
 
 //Optional menu option allowing for board sizes between 4X4 and 16X16
-/*const int AskUserForBoardSize(int client){
-  //Get the board's size 
-  while (1){
-    std::cout << "Please enter the size of the reversi board" << std::endl; 
-    const std::string input = GetInput(client); 
-    int size = -1; 
-    if ( IsInt(input,size) == false) 
-    { 
-      std::cout << "Please enter an integer value. " << std::endl; 
-      continue; 
-    } 
-    if ( size < 4) 
-    { 
-      std::cout << "Please enter an integer value bigger than 4. " << std::endl; 
-      continue; 
-    } 
-    if ( size > 16) 
-    { 
-      std::cout << "Please enter an integer value less than 16. " << std::endl; 
-      continue; 
-    } 
-    return size; 
-  } 
-}*/
-
 const int AskUserForBoardSize(int client){
   //Get the board's size 
   while (1){
@@ -262,15 +235,6 @@ const int AskUserForBoardSize(int client){
 }
 
 //inserts the possibleMove symbol into the proper locations of the board
-/*void showPossibleMoves(){
-	Reversi tempValid(boardSize);
-	tempValid.SetBoard(game.GetBoard());
-	std::vector< std::pair<int,int> > vals = tempValid.GetValidMoves(CurrentPlayer);
-	for(int i=0; i<vals.size(); i++)
-		tempValid.SetSquare(vals[i].first,vals[i].second,validMove);
-	std::cout<<tempValid<<"\n";
-}*/
-//inserts the possibleMove symbol into the proper locations of the board
 void showPossibleMoves(int client){
 	Reversi tempValid(boardSize);
 	tempValid.SetBoard(game.GetBoard());
@@ -286,7 +250,6 @@ void showPossibleMoves(int client){
 	send(client, sTempValid.c_str(), sTempValid.size(), 0);
 	
 }
-
 
 //uses the current time as a randomizing seed to select from available moves
 void moveRandomly(){
@@ -640,7 +603,7 @@ int handleGameInput(int client){
 				
 				send(client, osMessage1.str().c_str(), osMessage1.str().size(), 0);
 				
-				CurrentPlayer=GetOtherPlayer(CurrentPlayer);
+				
 				ostringstream osMessage2;			
 				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
 				osMessage2 << "The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
@@ -816,7 +779,6 @@ int handleGameInput(int client){
     return 1;
 }
 
-
 class gameStart {
 
 public:
@@ -874,78 +836,6 @@ public:
 		return 0;
 	}
 };
-
-
-
-/*
-//Handles user input and display of data 
-int api(std::string commandLine,int client){
-		for(int i=0;i<40;i++)std::cout<<"\n";
-		std::cout<< "WELCOME\n";
-	while(1){
-
-		if(!handlePregameInput(client)){return 0;}
-	
-		std::cout<<"Player1: "<<((PlayerIsAI(player1))?("AI    :"):("Human :"))<<player1<<": BLACK\n"<<RESET;
-		std::cout<<"Player2: "<<((PlayerIsAI(player2))?("AI    :"):("Human :"))<<player2<<": WHITE\n"<<RESET;
-		if(!handleGameInput(client))
-			return 0;
-		std::cout << "Press ENTER to continue.  Use the EXIT command at any time to quit.";
-		std::cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		game.SetBoard(newBoard.GetBoard());
-	}
-	return 0;
-}
-
-int main ( int argc, char *argv[] ){
-	if(argc>3){
-		// argc should be 1, 2, or 3 for correct execution
-		// We print argv[0] assuming it is the program name
-		cout<<"usage: "<< argv[0] <<" (<ExecutionCount>) (<SearchDepth>)\n";
-		return -1;
-	}
-	else{
-		if(argc==1){
-			//no args provided, use default vals (exeCount=1,MaxDepth=4)
-		}
-		else if(argc>=2){
-			//We assume argv[1] is an integer representing the number of executions to run
-			char * endptr=NULL;
-			int exeC = strtol(argv[1], &endptr, 10);
-			if(endptr==NULL){
-				cerr<<"Error in command arguments while processing <ExecutionCount>. Must be integer\n";
-				return -1;
-			}
-			else if(*endptr==0){
-				//totalExecutions = exeC;
-			}
-			else{
-				   cerr<<"Error in command arguments while processing <ExecutionCount>. Invalid Character: "<<endptr<<"\n";
-				   return -1;
-			}
-		}
-		if(argc==3){
-			//We assume argv[2] is an integer representing the Search Depth to use for AI
-			char * endptr=NULL;
-			int dpth = strtol(argv[2], &endptr, 10);
-			if(endptr==NULL){
-				cerr<<"Error in command arguments while processing <SearchDepth>. Must be integer\n";
-				return -1;
-			}
-			else if(*endptr==0){
-				maxDepth = dpth;
-			}
-			else{
-				   cerr<<"Error in command arguments while processing <SearchDepth>. Invalid Character: "<<endptr<<"\n";
-				   return -1;
-			}
-		}
-	}
-	int client=0;//temp value until implemented with server
-	api("START",client);
-	return 0;
-}
-*/
 
 /**      HARD-AI      **/
 /* Developed by Cutris */
@@ -1354,7 +1244,7 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth){
 //		}
 		weights.push_back(immediateMoveWeights);
 	}
-	std::cout<<"Value of this move:"<<maxMoveWeight<<std::endl;
+	//std::cout<<"Value of this move:"<<maxMoveWeight<<std::endl;
 //	int randomOfTheTopMoves = rand() % movesTiedForTop.size();
 	return vals[maxPossibleMove];//when done checking down each branch of possible Moves send the best move back
 

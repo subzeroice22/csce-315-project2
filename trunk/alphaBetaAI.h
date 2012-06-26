@@ -185,118 +185,9 @@ int heuristicWeightY(Reversi childBoard, Action newMove, Square moveOwner, int d
 	return cummulative;
 }
 
-int heuristicWeightV(Reversi childBoard, Action newMove, Square moveOwner, int depth){
-	int x= newMove.first;
-	int y= newMove.second;
-	int cummulative=0;
-	depth = MaxDepth - depth;
-	//got a corner
-	if(	(x==0&&y==0)||//top left
-		(x==bSize-1&&y==bSize-1)||//bottom right
-		(x==0&&y==bSize-1)||//bottom left
-		(x==bSize-1&&y==0)){ //top right
-		if(moveOwner==MaxPlayer)
-			return  10000/(depth+1);//45,19@5000&10k&11k&15k
-		else
-			return -10000/(depth+1);//45,19@-5000&-10k&-11k&-15k
-	}
-	//edge next to empty corner
-	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==empty)||
-		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==empty)||
-		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==empty)||
-		(((x==6&&y==7)||(7==1&&y==6))&&childBoard.GetSquare(7,7)==empty)){
-			if(moveOwner==MaxPlayer)
-				return -5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
-			else
-				return 5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
-	}
-	//safe edge next to corner
-	if( (((x==0&&y==1)||(x==1&&y==0))&&childBoard.GetSquare(0,0)==moveOwner)||
-		(((x==0&&y==6)||(x==1&&y==7))&&childBoard.GetSquare(0,7)==moveOwner)||
-		(((x==6&&y==0)||(x==7&&y==1))&&childBoard.GetSquare(7,0)==moveOwner)||
-		(((x==6&&y==7)||(x==7&&y==6))&&childBoard.GetSquare(7,7)==moveOwner)){
-			if(moveOwner==MaxPlayer)
-				return 5000/(depth+1);//36,28@-3000/33,31@5000&6000/39,25@-7000
-			else
-				return -5000/(depth+1);//36,28@3000/33,31@5000&6000/39,25@7000
-	}
-	//sweet-sixteen corner
-	if( ((x==2&&y==2)&&childBoard.GetSquare(0,0)==empty)||
-		((x==2&&y==5)&&childBoard.GetSquare(0,7)==empty)||
-		((x==5&&y==2)&&childBoard.GetSquare(7,0)==empty)||
-		((x==5&&y==5)&&childBoard.GetSquare(7,7)==empty) ){
-			if(moveOwner==MaxPlayer)
-				return 2500/(depth+1);
-			else
-				return -2500/(depth+1);
-	}
-	//deadman's corner
-	if( ((x==1&&y==1)&&childBoard.GetSquare(0,0)==empty)||
-		((x==1&&y==6)&&childBoard.GetSquare(0,7)==empty)||
-		((x==6&&y==1)&&childBoard.GetSquare(7,0)==empty)||
-		((x==6&&y==6)&&childBoard.GetSquare(7,7)==empty) ){
-			if(moveOwner==MaxPlayer)
-				return -5000/(depth+1);
-			else
-				return 5000/(depth+1);
-	}
-	//got an edge, blocking a straightaway
-	if( (x==0&&(y<bSize-3&&y>2))&&
-		childBoard.GetSquare(x+1,y)==GetOtherPlayer(moveOwner))
-		if(moveOwner==MaxPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (x==bSize-1&&(y<bSize-3&&y>2))&&
-		childBoard.GetSquare(x-1,y)==GetOtherPlayer(moveOwner))
-		if(moveOwner==MaxPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (y==0&&(x<bSize-3&&x>2))&&
-		childBoard.GetSquare(x,y+1)==GetOtherPlayer(moveOwner))
-		if(moveOwner==MaxPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( (y==bSize-1&&(x<bSize-3&&x>2))&&
-		childBoard.GetSquare(x,y-1)==GetOtherPlayer(moveOwner))
-		if(moveOwner==MaxPlayer)
-			cummulative+= 1500/(depth+1);
-		else
-			cummulative+= -1500/(depth+1);
-	if( x==0||//left edge
-		x==bSize-1||//right edge
-		y==0||//top edge
-		y==bSize-1){//bottom edge
-		if(moveOwner==MaxPlayer)
-			cummulative+= 750/(depth+1);
-		else
-			cummulative-= 750/(depth+1);
-	}
-	//avoid these
-	if( x==1||x==bSize-2){
-		if(moveOwner==MaxPlayer)
-			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
-		else
-			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
-	}
-	if( y==1||y==bSize-2){
-		if(moveOwner==MaxPlayer)
-			cummulative-= 1500/(depth+1);//in this case player doesn't want this move
-		else
-			cummulative+= 1500/(depth+1);//player would like his opponent to make this move
-	}
-
-	return cummulative;
-}
-
 
 bool TerminalTest(State S, Square player){
-    //TODO: IMPLEMENT!
     return S.GetValidMoves(player).size()==0;
-    //need some condsideration for: if no valid moves for player, player loses turn
-    //return false;
 }
 
 State Result(const State S, Action A, Square player){
@@ -307,13 +198,9 @@ State Result(const State S, Action A, Square player){
 }
 
 UtilityValue Utility(const State S, Action newMove, Square player, int Depth){
-	UtilityValue v = heuristicWeightY(S, newMove, player, Depth);
+	UtilityValue v = heuristicWeightZ(S, newMove, player, Depth);
 	//cout<<"Returning Utility of: "<<v<<" for move:"<<newMove.first<<","<<newMove.second<<"\n";
 	return v;
-    //consider S->Count(player) - S->Count(GetOtherPlayer(player));
-    //consider # of edge and corner pieces
-    //consider GetValidMoves(GetOtherPlayer(player)).size(); //i.e. number of moves other play can make
-    //consider number of GetOtherPlayer(player) pieces that player can flip 
 }
 
 vector<Action> Actions(const State S, Square player){
@@ -349,7 +236,6 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
         }
 		//if(maxPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
 		//if(maxPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
-		
         return maxPlay;
     }
     else{ //player==MinPlayer
@@ -398,7 +284,7 @@ struct AlphaBetaAI{
 		int posInf = numeric_limits<UtilityValue>::max();
         Play maxPlay = AlphaBeta(gState, player, depth, negInf, posInf, Action(-1,-1));
         //if((maxPlay.first.first==-1 || maxPlay.first.second==-1)){ cerr<<"AlphaBetaAI.findMax() returned -1,-1\n";}
-        cout<<"Value of this move is:"<<maxPlay.second<<"\n";
+        //cout<<"Value of this move is:"<<maxPlay.second<<"\n";
 		return maxPlay.first;
     }
 };
