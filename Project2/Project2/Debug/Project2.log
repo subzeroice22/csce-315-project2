@@ -1,22 +1,22 @@
-﻿Build started 6/25/2012 5:49:28 PM.
+﻿Build started 6/25/2012 7:01:49 PM.
      1>Project "H:\CSCE315Project2\Project2\Project2\Project2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
-         Creating "Debug\Project2.unsuccessfulbuild" because "AlwaysCreate" was specified.
+         Touching "Debug\Project2.unsuccessfulbuild".
        ClCompile:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt ..\..\UnitReversiMain.cpp
          UnitReversiMain.cpp
      1>h:\csce315project2\alphabetaai.h(240): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project2\alphabetaai.h(275): warning C4018: '<' : signed/unsigned mismatch
      1>h:\csce315project2\unitreversimain.cpp(133): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project2\unitreversimain.cpp(143): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+     1>h:\csce315project2\unitreversimain.cpp(144): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
                  c:\program files (x86)\microsoft visual studio 10.0\vc\include\string.h(105) : see declaration of 'strcpy'
-     1>h:\csce315project2\unitreversimain.cpp(217): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project2\unitreversimain.cpp(224): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>h:\csce315project2\unitreversimain.cpp(749): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project2\unitreversimain.cpp(820): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project2\unitreversimain.cpp(895): warning C4018: '<' : signed/unsigned mismatch
-     1>h:\csce315project2\unitreversimain.cpp(922): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>h:\csce315project2\unitreversimain.cpp(929): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(219): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(226): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>h:\csce315project2\unitreversimain.cpp(761): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(832): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(907): warning C4018: '<' : signed/unsigned mismatch
+     1>h:\csce315project2\unitreversimain.cpp(934): warning C4244: 'argument' : conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>h:\csce315project2\unitreversimain.cpp(941): warning C4018: '<' : signed/unsigned mismatch
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"H:\CSCE315Project2\Project2\Debug\Project2.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"Debug\Project2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"H:\CSCE315Project2\Project2\Debug\Project2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"H:\CSCE315Project2\Project2\Debug\Project2.lib" /MACHINE:X86 Debug\UnitReversi.obj
          Debug\UnitReversiMain.obj
@@ -31,4 +31,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:05.50
+Time Elapsed 00:00:07.35
