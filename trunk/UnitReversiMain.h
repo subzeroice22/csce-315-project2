@@ -766,6 +766,7 @@ int handleGameInput(int client){
 					winCountStringStream<<"Player1 ("<<p1Name<<") won "<<blackWins<<"\n"<<"Player2 ("<<p2Name<<")won "<<whiteWins<<"\n";
 					PrintOut(winCountStringStream.str(),client);
 				 numOfGamesCompleted++;
+				 MoveCount=0;
 				game.SetBoard(newBoard.GetBoard());
 				 continue;
 				}

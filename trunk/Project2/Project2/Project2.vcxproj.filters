@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\UnitReversiMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\UnitReversi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,6 +24,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\alphaBetaAI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\UnitReversiMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
