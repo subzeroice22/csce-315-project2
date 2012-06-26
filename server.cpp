@@ -5,8 +5,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-
-//#include "gameStart.h"
 #include "UnitReversiMain.h"
 
 using namespace std;
@@ -58,11 +56,6 @@ int main() {
 	
 	//accept connections	
 	client_sock = accept(sock, (struct sockaddr *)&client_address, (socklen_t*)&client_length);
-		
-	//send client connection message, check if send() was successful
-	int send_status = send(client_sock, "null", 0, 0);	
-	
-	cout << "Send status:\t" << send_status << '\n';
 	cout << "Client socket:\t" << client_sock << '\n';
 	
 	gameStart reversi;
