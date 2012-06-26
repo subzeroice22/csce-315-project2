@@ -409,6 +409,7 @@ int handleGameInput(int client){
 				const int n2 = game.Count(player2); //TODO: ADD IN TIE CASE
 				std::string p1Name = (PlayerIsAI(player1))?(AIlevelP1+"-AI"):("Human");
 				std::string p2Name = (PlayerIsAI(player2))?(AIlevelP2+"-AI"):("Human");
+				stringstream ss;
 				std::cout<< "The game has ended after "<<MoveCount<<" moves!\n"
 						<<"Player1 ("<<p1Name<<")["<<player1<<"] conquered "<<n1<<" squares.\n"
 						<<"Player2 ("<<p2Name<<")["<<player2<<"] conquered "<<n2<<" squares.\n";
@@ -445,7 +446,7 @@ int handleGameInput(int client){
                     moveRandomly();
                 }
 				else if(AIlevel(CurrentPlayer)=="PRUNE"){
-					AlphaBetaAI ai(game, CurrentPlayer, 3);
+					AlphaBetaAI ai(game, CurrentPlayer, maxDepth);
 					coordinate = ai.findMax();
 				}
                 else if(AIlevel(CurrentPlayer)=="MEDIUM"){
@@ -550,7 +551,58 @@ int api(std::string commandLine,int client){
 	return 0;
 }
 
-int main() {
+int main ( int argc, char *argv[] ){
+	if(argc>3){
+		// argc should be 1, 2, or 3 for correct execution
+		// We print argv[0] assuming it is the program name
+		cout<<"usage: "<< argv[0] <<" (<ExecutionCount>) (<SearchDepth>)\n";
+		return -1;
+	}
+	else{
+		if(argc==1){
+			//no args provided, use default vals (exeCount=1,MaxDepth=4)
+		}
+		else if(argc>=2){
+			//We assume argv[1] is an integer representing the number of executions to run
+			char * endptr=NULL;
+			int exeC = strtol(argv[1], &endptr, 10);
+			if(endptr==NULL){
+				/* the whole string is garbage - no numbers extracted */
+				cerr<<"Error in command arguments while processing <ExecutionCount>. Must be integer\n";
+				return -1;
+			}
+			else if(*endptr==0){
+				/* the whole string was a number - yay! */
+				//totalExecutions = exeC;
+			}
+			else{
+				/* strtol extracted a number from the string, but stopped at some invalid character
+				   that you can check by looking at the value of endptr */
+				   cerr<<"Error in command arguments while processing <ExecutionCount>. Invalid Character: "<<endptr<<"\n";
+				   return -1;
+			}
+		}
+		if(argc==3){
+			//We assume argv[2] is an integer representing the Search Depth to use for AI
+			char * endptr=NULL;
+			int dpth = strtol(argv[2], &endptr, 10);
+			if(endptr==NULL){
+				/* the whole string is garbage - no numbers extracted */
+				cerr<<"Error in command arguments while processing <SearchDepth>. Must be integer\n";
+				return -1;
+			}
+			else if(*endptr==0){
+				/* the whole string was a number - yay! */
+				maxDepth = dpth;
+			}
+			else{
+				/* strtol extracted a number from the string, but stopped at some invalid character
+				   that you can check by looking at the value of endptr */
+				   cerr<<"Error in command arguments while processing <SearchDepth>. Invalid Character: "<<endptr<<"\n";
+				   return -1;
+			}
+		}
+	}
 	int client=0;//temp value until implemented with server
 	api("START",client);
 	return 0;
@@ -968,36 +1020,3 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth){
 	return vals[maxPossibleMove];//when done checking down each branch of possible Moves send the best move back
 
 }
-
-
-
-/*
-
-Current Player:@
-Waiting on AI
-  _ _ _ _ _ _ _ _
-1|@|@|O|O|O|O|O|O|
-2|O|O|@|O|@|O|O|O|
-3|O|@|@|@|O|O|@|O|
-4|O|@|@|@|@|O|@|O|
-5|O|@|@|@|@|@|O|O|
-6|@|@|@|@|@|@|@|O|
-7|@|@|@|@|@|O|O|O|
-8|@|@|@|@|@|@|O|O|
-  a b c d e f g h
-The game has ended
-Player1 (MEDIUM-AI)[O] conquered 28 squares.
-Player2 (PRUNE-AI)[@] conquered 36 squares.
-The winner is Player2(PRUNE-AI)
-Congratulations!
-
-^^EXACT DATA EVERY TIME^^
-
-
-
-
-
-
-
-*/
-
