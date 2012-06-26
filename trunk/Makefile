@@ -11,3 +11,4 @@ run_server:
 
 run_console:
 	./console
+
