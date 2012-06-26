@@ -24,7 +24,7 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,maxDepth=2,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
+int boardSize=8,randomMove,maxDepth=4,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -200,11 +200,17 @@ const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate
     if((input.size()!=3 && server) || (input.size()!=2 && !server)) return false;
 	//TODO: need error (bounds) checking on x and y
     int x, y;
-    x = input[0] - 'A';
-    y = int(input[1] - '0')-1;
-    coordinate.first=x;
-	coordinate.second=y;
+		x = input[0] - 'A';
+		y = int(input[1] - '0')-1;
+	if((x==0||(x>0&&x<8))&&(y==0||(y>0&&y<8))){
+
+		cout<<"coordinate "<<x<<" and "<<y<<"\n";
+		coordinate.first=x;
+		coordinate.second=y;
+		return true;
+	}else{
     return true;
+	}
 } 
 
 //Optional menu option allowing for board sizes between 4X4 and 16X16
@@ -597,19 +603,19 @@ int handleGameInput(int client){
 				}
 			}else{
 				//If Current Player cannot move, but other player can
-				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
+				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") is unabled to do a valid move!\n"; 
 				CurrentPlayer=GetOtherPlayer(CurrentPlayer);
-				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
+				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") !\n";
 				
 				ostringstream osMessage1;
-				osMessage1 << "Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
+				osMessage1 << "Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") is unabled to do a valid move!\n"; 
 				
 				send(client, osMessage1.str().c_str(), osMessage1.str().size(), 0);
 				
 				
 				ostringstream osMessage2;			
-				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
-				osMessage2 << "The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") !\n";
+				std::cout<<"The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") !\n";
+				osMessage2 << "The next turn again goes to Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") !\n";
 				send(client, osMessage2.str().c_str(), osMessage2.str().size(), 0);
 				
 				
@@ -634,10 +640,8 @@ int handleGameInput(int client){
                 }
 				*/
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					maxDepth=2;
 					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
-
                 }
                 std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
 				
