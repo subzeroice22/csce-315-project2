@@ -139,13 +139,15 @@ const std::string GetInput(int client){
 
 //Handles all output.  Takes a string and either cout or sends
 void PrintOut(std::string inString,int client){
-	char charToSend[30];
+	char* charToSend = new char[inString.size()];
+	//char charToSend[80];
 	strcpy(charToSend,inString.c_str());
 	if(server==true){
 		//send(client,charToSend+'\n',sizeof(charToSend+'\n'),0);
 	}else {
 		std::cout<<inString;
 	}
+	delete [] charToSend;
 }
 
 //Breaks up the coordinate input for an x and y value
@@ -389,8 +391,8 @@ std::pair<int,int> findBestMoveY(Square forecastPlayer,int depth);
 
 //receives all input during the execution of the game
 int handleGameInput(int client){
-	int MoveCount=0;
-    while(1){
+	int MoveCount=0,numOfGamesCompleted=0,blackWins=0,whiteWins=0;
+    while(numOfGamesCompleted<totalExecutions){
 		
         if(displayOn){
             std::cout<<"-------------------\n";
@@ -415,8 +417,18 @@ int handleGameInput(int client){
 				else{
 					std::cout<<"The winner is Player"<<((n1>n2)?("1("+p1Name+")"):("2("+p2Name+")"))
 						<<"\nCongratulations!\n\n";
+					if(n1>n2)
+						blackWins++;
+					else
+						whiteWins++;
 				}
-				 return 1;
+				if(totalExecutions>1){
+					std::stringstream winCountStringStream;
+					winCountStringStream<<"Player1 ("<<p1Name<<") won "<<blackWins<<"\n"<<"Player2 ("<<p2Name<<")won "<<whiteWins<<"\n";
+					cout<<winCountStringStream.str();
+					PrintOut(winCountStringStream.str(),client);
+				 numOfGamesCompleted++;
+				}
 			}else{
 				//If Current Player cannot move, but other player can
 				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<") is unabled to do a valid move!\n"; 
