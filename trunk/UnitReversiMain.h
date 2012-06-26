@@ -24,7 +24,7 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,maxDepth=6,testMaxDepth=4,totalExecutions=1,blackWins=0,whiteWins=0,alphaBeta=-9999;
+int boardSize=8,randomMove,maxDepth=4,maxDepthX=6,maxDepthY=4,maxDepthZ=4,totalExecutions=1,blackWins=0,whiteWins=0,alphaBeta=-9999;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -118,6 +118,7 @@ const bool IsInt(const std::string& s, int& rInt){
   return true; 
 } 
 
+//Handles all input and drops the newline char.  Either recv or getlines.
 const std::string GetInput(int client) {
 	if(client != 0) {
 		char input[30];
@@ -139,23 +140,6 @@ const std::string GetInput(int client) {
 	}
 	
 }
-
-//Handles all input and drops the newline char.  Either recv or getlines.
-/*const std::string GetInput(int client){
-	char input[30],c;
-	std::string s; 
-	if(server==true){
-		//recv(client, input, sizeof(input),0);
-		s=input;
-	}else{
-		std::getline(std::cin,s,'\n'); 
-	}
-	for(int i=0;i<s.size();i++){
-		c=s[i];
-		s[i]=toupper(c);
-	}
-	return s; 
-}*/
 
 //Handles all output.  Takes a string and either cout or sends
 void PrintOut(std::string inString,int client){
@@ -586,15 +570,8 @@ int handleGameInput(int client){
 						p2Wins = p2Wins + p2Name + ")";
 						send(client, p2Wins.c_str(), p2Wins.size(), 0);
 					}
-					
 					send(client, "\nCongratulations!\n\n", 19, 0);
-					
-				
 				}
-				
-				
-				
-				
 				if(totalExecutions>1){
 					std::stringstream winCountStringStream;
 					winCountStringStream<<"Player1 ("<<p1Name<<") won "<<blackWins<<"\n"<<"Player2 ("<<p2Name<<")won "<<whiteWins<<"\n";
@@ -603,7 +580,8 @@ int handleGameInput(int client){
 				 MoveCount=0;
 				game.SetBoard(newBoard.GetBoard());
 				 continue;
-				}
+				}break;
+
 			}else{
 				//If Current Player cannot move, but other player can
 				std::cout<<"Too bad! Player"<<int(CurrentPlayer)<<"("<<CurrentPlayer<<RESET<<") is unabled to do a valid move!\n"; 
@@ -636,13 +614,13 @@ int handleGameInput(int client){
 					AlphaBetaAI ai(game, CurrentPlayer, 3);
 					coordinate = ai.findMax();
 				}*/
-                else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-					std::pair<int,int> bestMove = findBestMoveX(CurrentPlayer,0);
+               else if(AIlevel(CurrentPlayer)=="MEDIUM"){
+					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
-                }
+               }
 
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
+					std::pair<int,int> bestMove = findBestMoveX(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
                 }
                 std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
@@ -848,7 +826,6 @@ public:
 
 /**      HARD-AI      **/
 /* Developed by Cutris */
-
 
 //simply checks to see if the passed board is "game-over"
 int endGameEvaluator(Reversi childBoard){
@@ -1198,7 +1175,7 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 							forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
-		if(	depth<maxDepth&&//if not at our maximum allowed recursion
+		if(	depth<maxDepthZ&&//if not at our maximum allowed recursion
 			heuristicWeightZ(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
@@ -1219,9 +1196,9 @@ int checkForWeightZ(Reversi parentBoard, Square forecastPlayer,int depth){
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
 		if(childBoard.Count(empty)>53){
-			if(MaxMoveWeight>500*maxDepth)
+			if(MaxMoveWeight>500*maxDepthZ)
 				break;
-		}else if(MaxMoveWeight>900*maxDepth)
+		}else if(MaxMoveWeight>900*maxDepthZ)
 			break;
 		
 	}
@@ -1273,7 +1250,7 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
-		if(	depth<maxDepth&&//if not at our maximum allowed recursion
+		if(	depth<maxDepthY&&//if not at our maximum allowed recursion
 			heuristicWeightY(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
@@ -1296,9 +1273,9 @@ int checkForWeightY(Reversi parentBoard, Square forecastPlayer,int depth){
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
 		if(childBoard.Count(empty)>53){
-			if(MaxMoveWeight>500*maxDepth)
+			if(MaxMoveWeight>500*maxDepthY)
 				break;
-		}else if(MaxMoveWeight>900*maxDepth)
+		}else if(MaxMoveWeight>900*maxDepthY)
 			break;
 /*		weights.push_back(forecastedMoveWeight);
 		if(weights.size()==vals.size())
@@ -1357,7 +1334,7 @@ int checkForWeightX(Reversi parentBoard, Square forecastPlayer,int depth){
 			forecastedMoveWeight+=numOfAvailableMovesEvaluator(childBoard,forecastPlayer);
 		//we will pass a copy of this board recursively
 		//here, we attempt to only recurse if necessary 
-		if(	depth<maxDepth&&//if not at our maximum allowed recursion
+		if(	depth<maxDepthX&&//if not at our maximum allowed recursion
 			heuristicWeightX(childBoard,//here we say that we don't want to bother
 							vals[possibleMove].first,//checking further down this move's
 							vals[possibleMove].second,//lineage if it involves the
@@ -1380,13 +1357,13 @@ int checkForWeightX(Reversi parentBoard, Square forecastPlayer,int depth){
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
 		if(childBoard.Count(empty)>50){
-			if(MaxMoveWeight>300*maxDepth)
+			if(MaxMoveWeight>300*maxDepthX)
 				break;
 		}else if(childBoard.Count(empty)>25){
-			if(MaxMoveWeight>500*maxDepth)
+			if(MaxMoveWeight>500*maxDepthX)
 				break;
 		}else
-			if(MaxMoveWeight>600*maxDepth)
+			if(MaxMoveWeight>600*maxDepthX)
 				break;
 /*		weights.push_back(forecastedMoveWeight);
 		if(weights.size()==vals.size())
