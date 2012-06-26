@@ -1,2 +1,2 @@
 server.o: 	server.cpp
-		g++ server.cpp -o server -lnsl -lsocket -lresolv
+		g++ server.cpp UnitReversi.cpp -o game -lsocket
