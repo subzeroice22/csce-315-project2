@@ -5,8 +5,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+
 //#include "gameStart.h"
-#include "UnitReversiMain.h"
+#include "UnitReversiMain2.h"
 
 using namespace std;
 
