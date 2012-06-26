@@ -347,8 +347,8 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
                 break;
             }
         }
-		if(maxPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
-		if(maxPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
+		//if(maxPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
+		//if(maxPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
 		
         return maxPlay;
     }
@@ -372,8 +372,8 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
                 break;
             }
         }
-        if(minPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
-		if(minPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
+        //if(minPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
+		//if(minPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
         return minPlay;
     }
 }
