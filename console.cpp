@@ -85,8 +85,8 @@ int main ( int argc, char *argv[] ){
 		}
 	}
 	gameStart reversi;
-	reversi.api("START", 0);
-	return 0;
+	return reversi.api("START", 0);
+	//return 0;
 }
 
 
