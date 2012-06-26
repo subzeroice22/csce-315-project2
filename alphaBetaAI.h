@@ -307,9 +307,8 @@ State Result(const State S, Action A, Square player){
 }
 
 UtilityValue Utility(const State S, Action newMove, Square player, int Depth){
-	UtilityValue v = S.Count(player);
-	v = heuristicWeightY(S, newMove, player, Depth);
-	cout<<"Returning Utility of: "<<v<<" for move:"<<newMove.first<<","<<newMove.second<<"\n";
+	UtilityValue v = heuristicWeightY(S, newMove, player, Depth);
+	//cout<<"Returning Utility of: "<<v<<" for move:"<<newMove.first<<","<<newMove.second<<"\n";
 	return v;
     //consider S->Count(player) - S->Count(GetOtherPlayer(player));
     //consider # of edge and corner pieces
@@ -321,7 +320,6 @@ vector<Action> Actions(const State S, Square player){
     return S.GetValidMoves(player);
 }
 
-
 Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta, Action newMove){
     if(CurrDepth==0){
         return Play(newMove, Utility(S,newMove,player,CurrDepth));
@@ -329,24 +327,15 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
     if(TerminalTest(S,player)){
         return Play(newMove, Utility(S,newMove,player,CurrDepth));
     }
-    
     if(player==MaxPlayer){
-		
-        //set default play:
-        //TODO: change default value to alpha?
         Play maxPlay = Play(Action(-2,-2),alpha);
-        
         //Get all possibleMoves that Player can make
         vector<Action> possibleMoves = Actions(S,player);
-        
-		
-		cout<<"Enter MAX D:"<<CurrDepth<<" A:"<<alpha<<" B:"<<beta<<" PosMovs:"<<possibleMoves.size()<<"\n";
-		
-		
+        //cout<<"Enter MAX D:"<<CurrDepth<<" A:"<<alpha<<" B:"<<beta<<" PosMovs:"<<possibleMoves.size()<<"\n";
 		for(int i=0; i<possibleMoves.size(); i++){
             Action possibleMove=possibleMoves[i];
             State s0 = Result(S,possibleMove,player); //Get State after applying possibleMove by Player
-            cout<<"Move["<<i<<"]:"<<possibleMove.first<<","<<possibleMove.second<<"\n";
+            //cout<<"Move["<<i<<"]:"<<possibleMove.first<<","<<possibleMove.second<<"\n";
 			Play play0 = AlphaBeta(s0, GetOtherPlayer(player), CurrDepth-1, maxPlay.second, beta, possibleMove);
             if(play0.second>maxPlay.second){
                 maxPlay=play0;
@@ -354,34 +343,24 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
             }
             if(beta<=maxPlay.second){
                 //beta cut-off
-				cout<<"Beta Cutoff \n";
+				//cout<<"Beta Cutoff \n";
                 break;
             }
         }
-		
-        if(maxPlay.first.first==-1){
-            cerr<<"!!unexpected -1-1 action. MaxPlayer, Depth:"<<CurrDepth<<" \n";
-        }
-		if(maxPlay.first.first==-2){
-            cerr<<"!!unexpected -2-2 action. MaxPlayer, Depth:"<<CurrDepth<<" \n";
-        }
+		if(maxPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
+		if(maxPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MaxPlayer, Depth:"<<CurrDepth<<" \n"; }
 		
         return maxPlay;
     }
     else{ //player==MinPlayer
-		//set default play:
-        //TODO: change default value to beta?
         Play minPlay = Play(Action(-2,-2),beta);
-        
         //Get all possibleMoves that Player can make
         vector<Action> possibleMoves = Actions(S,player);
-        
-		cout<<"Enter MIN D:"<<CurrDepth<<" A:"<<alpha<<" B:"<<beta<<" PosMovs:"<<possibleMoves.size()<<"\n";
-        
+		//cout<<"Enter MIN D:"<<CurrDepth<<" A:"<<alpha<<" B:"<<beta<<" PosMovs:"<<possibleMoves.size()<<"\n";
 		for(int i=0; i<possibleMoves.size(); i++){
             Action possibleMove=possibleMoves[i];
             State s0 = Result(S,possibleMove,player); //Get State after applying possibleMove by Player
-			cout<<"Move["<<i<<"]:"<<possibleMove.first<<","<<possibleMove.second<<"\n";
+			//cout<<"Move["<<i<<"]:"<<possibleMove.first<<","<<possibleMove.second<<"\n";
             Play play0 = AlphaBeta(s0,GetOtherPlayer(player),CurrDepth-1,alpha,minPlay.second, possibleMove);
             if(play0.second<minPlay.second){
                 minPlay=play0;
@@ -389,46 +368,16 @@ Play AlphaBeta(const State S, Square player, int CurrDepth, int alpha, int beta,
             }
             if(minPlay.second<=alpha){
                 //alpha cut-off
-				cout<<"Alpha Cutoff \n";
+				//cout<<"Alpha Cutoff \n";
                 break;
             }
         }
-		
-        if(minPlay.first.first==-1){
-            cerr<<"!!unexpected -1-1 action. MinPlayer, Depth:"<<CurrDepth<<" \n";
-        }
-		if(minPlay.first.first==-1){
-            cerr<<"!!unexpected -2-2 action. MinPlayer, Depth:"<<CurrDepth<<" \n";
-        }
-		
+        if(minPlay.first.first==-1){ cerr<<"!!unexpected -1-1 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
+		if(minPlay.first.first==-2){ cerr<<"!!unexpected -2-2 action. MinPlayer, Depth:"<<CurrDepth<<" \n"; }
         return minPlay;
     }
 }
-/*
-Action MinmaxAlphaBetaDecision(const State S, Square player, int Depth){ //NOTE: PlyDepth denotes the number of Plys to examine. 
-    if(TerminalTest(S,player)){
-        return Action(-1,-1);
-    }
-    //Get all possibleMoves that Player can make
-    vector<Action> possibleMoves = Actions(S,player);
 
-    //Initialize MaxPlay's UtilityValue to 'negative infinity'
-    pair<Action,UtilityValue> MaxPlay = pair<Action,UtilityValue>(pair<int,int>(-1,-1),numeric_limits<UtilityValue>::min()); 
-
-    //Evaluate each possibleMove, Maximize the Minimized UtilityValues
-    for(int i=0;i<possibleMoves.size();i++) { 
-        Action possibleMove=possibleMoves[i];
-        State s0 = Result(S,possibleMove,player); //Get State after applying possibleMove by Player
-        Play s0Util = FindMin(s0,player,Depth-1); //Get Minimized Play (Action,UtilityValue) from said state //NOTE: PlyDepth*2 is the MaxDepth for FindMin and FindMax
-        if(s0Util.second>MaxPlay.second){ //Maximize the Minimized UtilityValue
-            MaxPlay.first=possibleMove;
-            MaxPlay.second=s0Util.second;
-        }
-    }
-    if((MaxPlay.first.first==-1 || MaxPlay.first.second==-1)){ cerr<<"Should not get here. Ref:1235 MinmaxDecision() File:AI.h\n"; exit(-1);}
-    return MaxPlay.first;
-}
-*/
 struct AlphaBetaAI{
     Reversi gState;
     Square player;
@@ -447,37 +396,10 @@ struct AlphaBetaAI{
     Action findMax(){
 		int negInf = numeric_limits<UtilityValue>::min();
 		int posInf = numeric_limits<UtilityValue>::max();
-		
         Play maxPlay = AlphaBeta(gState, player, depth, negInf, posInf, Action(-1,-1));
-        if((maxPlay.first.first==-1 || maxPlay.first.second==-1)){ throw "AlphaBetaAI.findMax() returned -1,-1\n";}
+        //if((maxPlay.first.first==-1 || maxPlay.first.second==-1)){ cerr<<"AlphaBetaAI.findMax() returned -1,-1\n";}
         cout<<"Value of this move is:"<<maxPlay.second<<"\n";
 		return maxPlay.first;
     }
 };
-
-
-/*
-int main ( int argc, char *argv[] ){
-	if(argc>3){
-		// argc should be 1, 2, or 3 for correct execution
-		// We print argv[0] assuming it is the program name
-		cout<<"usage: "<< argv[0] <<" <ExecutionCount> (<SearchDepth>)\n";
-		return -1;
-	}
-	else{
-		if(argc==1){
-			//no args provided, use default vals (exeCount=1,MaxDepth=4)
-		}
-		else if(argc==2){
-			//We assume argv[1] is an integer representing the number of executions to run
-			
-		}
-		else if(argc==3){
-			//We assume argv[1] is an integer representing the number of executions to run
-			//We assume argv[2] is an integer representing the Search Depth to use for AI
-		
-		}
-	}
-}
-*/
 
