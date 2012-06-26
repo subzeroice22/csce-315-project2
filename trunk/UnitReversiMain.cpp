@@ -139,6 +139,7 @@ const std::string GetInput(int client){
 
 //Handles all output.  Takes a string and either cout or sends
 void PrintOut(std::string inString,int client){
+
 	char* charToSend = new char[inString.size()];
 	//char charToSend[80];
 	strcpy(charToSend,inString.c_str());
@@ -147,7 +148,8 @@ void PrintOut(std::string inString,int client){
 	}else {
 		std::cout<<inString;
 	}
-	delete [] charToSend;
+
+//	delete [] charToSend;
 }
 
 //Breaks up the coordinate input for an x and y value
@@ -426,9 +428,10 @@ int handleGameInput(int client){
 				if(totalExecutions>1){
 					std::stringstream winCountStringStream;
 					winCountStringStream<<"Player1 ("<<p1Name<<") won "<<blackWins<<"\n"<<"Player2 ("<<p2Name<<")won "<<whiteWins<<"\n";
-					cout<<winCountStringStream.str();
 					PrintOut(winCountStringStream.str(),client);
 				 numOfGamesCompleted++;
+				game.SetBoard(newBoard.GetBoard());
+				 continue;
 				}
 			}else{
 				//If Current Player cannot move, but other player can
