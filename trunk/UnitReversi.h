@@ -12,7 +12,7 @@
 #include <string>
 #include <stack>
 enum Square { empty, player1, player2, validMove }; 
-/*the following are UBUNTU/LINUX ONLY terminal color codes.
+//the following are UBUNTU/LINUX ONLY terminal color codes.
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"     
 #define RED     "\033[31m"     
@@ -30,8 +30,9 @@ enum Square { empty, player1, player2, validMove };
 #define BOLDMAGENTA "\033[1m\033[35m"      
 #define BOLDCYAN    "\033[1m\033[36m"     
 #define BOLDWHITE   "\033[1m\033[37m"      
-//-------------------------------------------------------------------------*/
+//-------------------------------------------------------------------------
 //the following is for testing in a windows console
+/*
 #define RESET   ""
 #define BLACK   ""      
 #define RED     ""      
@@ -49,6 +50,7 @@ enum Square { empty, player1, player2, validMove };
 #define BOLDMAGENTA ""    
 #define BOLDCYAN    ""      
 #define BOLDWHITE   ""      
+*/
 //-------------------------------------------------------------------------//
 struct Reversi{
     Reversi(const int size=8); 

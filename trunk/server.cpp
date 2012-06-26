@@ -7,7 +7,7 @@
 #include <iostream>
 
 //#include "gameStart.h"
-#include "UnitReversiMain2.h"
+#include "UnitReversiMain.h"
 
 using namespace std;
 
