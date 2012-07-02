@@ -46,7 +46,7 @@ To run the server with the makefile use:
 
 The server can also be manually launched by ./server.
 Once the server is running, the telnet client can be used to connect to it like so:
-	telnet unix.cs.tamu.edu 5000
+	telnet unix.cs.tamu.edu 5500
 
 The console application can be manually launched by ./console.
 The console also accepts arguments when being launched. 

@@ -24,7 +24,7 @@
 #include "alphaBetaAI.h"
 
 //Global Variables //Default case, P1=Black=Human, P2=WHITE=EASYAI. //P1 ALWAYS goes first
-int boardSize=8,randomMove,maxDepth=4,maxDepthX=6,maxDepthY=4,maxDepthZ=4,totalExecutions=1,blackWins=0,whiteWins=0,alphaBeta=-9999;
+int boardSize=8,randomMove,maxDepth=4,maxDepthX=2,maxDepthY=4,maxDepthZ=4,totalExecutions=1,blackWins=0,whiteWins=0,alphaBeta=-9999;
 bool displayOn=true,test=false,server=false;
 Square CurrentPlayer=player1; //Indicates whose turn it currently is. Game always starts with P1, who is always BLACK.
 const std::string defaultAISetting="EASY";
@@ -122,14 +122,15 @@ const bool IsInt(const std::string& s, int& rInt){
 const std::string GetInput(int client) {
 	if(client != 0) {
 		char input[30];
+		std::string returnString;
 		std::stringstream ss;
 		recv(client, input, 30, 0);
-	
-		for(int i = 0; input[i] != '\n'; i++) {
-			ss<<(toupper(input[i]));
+		returnString = input;//switch the char to a string for easier manipulation
+		returnString=returnString.substr(0,returnString.find("\n"));returnString=returnString.substr(0,returnString.size()-1);
+		for(int i = 0; i<returnString.length(); i++) {
+			returnString[i]=(toupper(returnString[i]));
 		}
-	
-		return ss.str();
+		return returnString;
 	} else {
 		string input;
 		std::cin >> input;
@@ -181,7 +182,7 @@ const std::vector<std::string> SeperateString(std::string input, const char sepe
 
 //Up front determination whether the users coordinate is a valid input type 
 const bool IsCoordinate(const std::string& input, std::pair<int,int>& coordinate){
-    if((input.size()!=3 && server) || (input.size()!=2 && !server)) return false;
+//    if((input.size()!=3 && server) || (input.size()!=2 && !server)) return false;
 	//TODO: need error (bounds) checking on x and y
     int x, y;
 		x = input[0] - 'A';
@@ -615,12 +616,12 @@ int handleGameInput(int client){
 					coordinate = ai.findMax();
 				}*/
                else if(AIlevel(CurrentPlayer)=="MEDIUM"){
-					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
+					std::pair<int,int> bestMove = findBestMoveX(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;
                }
 
                 else if(AIlevel(CurrentPlayer).substr(0,4)=="HARD"){
-					std::pair<int,int> bestMove = findBestMoveX(CurrentPlayer,0);
+					std::pair<int,int> bestMove = findBestMoveY(CurrentPlayer,0);
 					coordinate.first=bestMove.first;coordinate.second=bestMove.second;//38,26vsZ
                 }
                 std::cout<<AIlevel(CurrentPlayer)<<"-AI Plays:"<<char('A'+coordinate.first)<<coordinate.second+1<<"\n";
@@ -645,9 +646,10 @@ int handleGameInput(int client){
                 const std::string input = GetInput(client);
                 const bool isValidCoordinate = IsCoordinate(input, coordinate); 
                 if (isValidCoordinate == false){
-                    //Input was not a Coordinate
-                    //if(input=="EXIT") return 0;
-					if( strncmp(input.c_str(), "EXIT", 4) == 0) return 0;
+                    std::cout<<"determined not to be a valid coord\n";
+					//Input was not a Coordinate
+					if(input=="EXIT") return 0;
+					//if( strncmp(input.c_str(), "EXIT", 4) == 0) return 0;
 					// else if(input=="?"){
 					else if( strncmp(input.c_str(), "?", 1) == 0) {
                         std::cout<<"Enter coordinates as # alpha values, DISPLAY_OFF, SHOW_NEXT_POS, UNDO, REDO, EXIT\n";
@@ -750,7 +752,7 @@ int handleGameInput(int client){
         
         //Check that move is valid for Current Player.
         if (game.IsValidMove(coordinate.first, coordinate.second, CurrentPlayer) == false){
-            std::cout << "ILLEGAL\n";
+            //std::cout <<input<< " was ILLEGAL\n";
 			send(client, "ILLEGAL\n", 8, 0);
             continue; 
         }
@@ -859,7 +861,6 @@ int numOfAvailableMovesEvaluator(Reversi childBoard,Square forecastPlayer){
 	return 0;
 
 }
-
 
 //Original-flawed
 int heuristicWeightZ(Reversi childBoard, int x, int y, Square moveOwner, int depth){
@@ -1356,26 +1357,17 @@ int checkForWeightX(Reversi parentBoard, Square forecastPlayer,int depth){
 		//stop itterating through the for loop looking at the next available
 		//move, if we have already found a great move (alpha-beta, pruning)
 		//we use a different acceptable weight at the beginning of the game.
-		if(childBoard.Count(empty)>50){
-			if(MaxMoveWeight>300*maxDepthX)
-				break;
-		}else if(childBoard.Count(empty)>25){
+/*		if(childBoard.Count(empty)>50){
 			if(MaxMoveWeight>500*maxDepthX)
 				break;
-		}else
-			if(MaxMoveWeight>600*maxDepthX)
+		}else if(childBoard.Count(empty)>25){
+			if(MaxMoveWeight>900*maxDepthX)
 				break;
-/*		weights.push_back(forecastedMoveWeight);
-		if(weights.size()==vals.size())
-			std::cout<<possibleMove+1;*/
-		
+		}else
+			if(MaxMoveWeight>1000*maxDepthX)
+				break;*/
 	}
-/*	if(vals.size()==0&&parentBoard.Count(empty)>4)
-		return MaxMoveWeight;
-	else if(vals.size()==0&&parentBoard.Count(empty)>0)
-		return -10000;
-	else*/
-		return MaxMoveWeight+vals.size()*100;//decided to add the num of avail
+	return MaxMoveWeight+vals.size()*100;//decided to add the num of avail
 }
 
 //Original-flawed

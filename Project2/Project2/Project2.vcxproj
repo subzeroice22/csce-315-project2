@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\console.cpp" />
+    <ClCompile Include="..\..\server.cpp" />
     <ClCompile Include="..\..\UnitReversi.cpp" />
   </ItemGroup>
   <ItemGroup>
