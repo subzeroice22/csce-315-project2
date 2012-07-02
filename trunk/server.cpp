@@ -28,7 +28,7 @@ int main() {
 	}	
 
 	memset(&server_address, 0, sizeof(server_address));
-	server_portno = 5000;
+	server_portno = 5500;
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	server_address.sin_port = htons(server_portno);
